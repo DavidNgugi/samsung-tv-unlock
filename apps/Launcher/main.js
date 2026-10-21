@@ -143,6 +143,7 @@
 
   var utils = [
     { key: "all", label: "All apps" },
+    { key: "refresh", label: "Refresh" },
     { key: "edit", label: "Edit Home" },
     { key: "store", label: "App Store" },
     { key: "music", label: "Music" },
@@ -669,8 +670,11 @@
       toast("Preview: would open " + app.name);
       return;
     }
+    // Settings is a partial component that paints nothing on a plain launch;
+    // the remote's Menu key (org.tizen.menu) is the real settings UI.
+    var id = app.id === SETTINGS_APP ? "org.tizen.menu" : app.id;
     try {
-      window.tizen.application.launch(app.id, function () { /* opened */ },
+      window.tizen.application.launch(id, function () { /* opened */ },
         function (err) {
           toast("Could not open " + app.name + ": " + (err && err.message ? err.message : "refused"));
         });
@@ -865,6 +869,7 @@
     if (state.zone === "utils") {
       var util = utils[state.utilIndex];
       if (util.key === "all") { showGrid(false); return; }
+      if (util.key === "refresh") { refreshApps(); return; }
       if (util.key === "edit") { showGrid(true); return; }
       if (util.key === "store") { launchStore(); return; }
       if (util.key === "music") { openMusic(); return; }
@@ -1520,6 +1525,12 @@
     });
   }
 
+  function refreshApps() {
+    if (!hasTizen()) { toast("Preview: refresh apps"); return; }
+    toast("Refreshing apps…");
+    setTimeout(fetchApps, 150);
+  }
+
   function loadApps() {
     if (!hasTizen()) {
       adopt(DEMO_APPS.slice());
@@ -1566,6 +1577,22 @@
     loadApps();
     try { SPOTIFY_URL = localStorage.getItem("spotifyUrl") || SPOTIFY_URL; } catch (e) {}
     setTimeout(pollSpotify, 1500);
+    try {
+      if (window.tizen && tizen.application && tizen.application.addAppInfoEventListener) {
+        tizen.application.addAppInfoEventListener(function (info) {
+          var t = info && info.eventType;
+          if (t === "appinstalled" || t === "appupdated" || t === "appuninstalled" ||
+              t === "appenabled" || t === "appdisabled") {
+            setTimeout(fetchApps, 1500);
+          }
+        });
+      }
+    } catch (e) { /* not available on this profile */ }
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState !== "visible") return;
+      var c = readAppsCache();
+      if (c && Date.now() - c.t > CACHE_MAX_AGE) setTimeout(fetchApps, 1500);
+    });
     if (/[?&]music=1/.test(location.search)) {
       setTimeout(function () { openMusic(); }, 1800);
     }

@@ -43,6 +43,14 @@ Never animate `width`, `height`, `top`, `left`, `margin`, `padding`, `border`,
 Without promotion, a transform can still re-rasterise. With it, the compositor
 moves an existing texture.
 
+### 2a. Keep the app resident, or Home is always a cold start
+
+If `background-support="disable"` (or unset), Tizen kills the app the moment it
+loses focus, so every Home press is a full webview cold start with the system
+"Loading…" splash. Set `background-support="enable"` in `config.xml` so the app
+survives in the background and Home only foregrounds it. This is what makes Home
+switching feel instant.
+
 ### 3. Use one floating highlight, not per-tile focus backgrounds
 
 A class that adds a background, border or shadow to a tile repaints the whole dock
