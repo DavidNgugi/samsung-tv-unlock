@@ -15,7 +15,7 @@
   var SELF = "tvunlock02.Launcher";
   var SETTINGS_APP = "com.samsung.tv.coba.setting";
   var SAMSUNG_HOME = "com.samsung.tv.csfs";
-  var NETWORK_SETTINGS = "com.samsung.tv.coba.setting.networksettings";
+  var NETWORK_SETTINGS = "org.tizen.NetworkSetting-Tizen";
   var SOURCE_APP = "com.samsung.tv.coba.source";
   var LIVETV_APP = "com.samsung.tv.coba.livetv";
   var STORE_KEY = "cleanhome.v2";
@@ -90,6 +90,7 @@
     utilIndex: 0,
     railIndex: 0,
     network: "",
+    wifiSsid: "",
     gridIndex: 0,
     apps: [],
     dock: [],
@@ -453,7 +454,7 @@
   function railItems() {
     return [
       { key: "music", label: "Music", sub: "Spotify" },
-      { key: "wifi", label: "Wi-Fi", sub: state.network === "WIFI" ? "connected" : "not connected", up: state.network === "WIFI" },
+      { key: "wifi", label: "Wi-Fi", sub: state.network === "WIFI" ? (state.wifiSsid || "Connected") : (state.network === "ETHERNET" ? "Ethernet" : "No network"), up: state.network === "WIFI" || state.network === "ETHERNET" },
       { key: "hdmi1", label: "HDMI 1", sub: "" },
       { key: "hdmi2", label: "HDMI 2", sub: "" },
       { key: "hdmi3", label: "HDMI 3", sub: "" },
@@ -474,9 +475,17 @@
       chip.className = "chip";
       node.appendChild(chip);
 
-      var dot = document.createElement("span");
-      dot.className = "dot" + (item.up ? "" : " off");
-      node.appendChild(dot);
+      if (item.key === "wifi") {
+        var ico = document.createElement("img");
+        ico.className = "rail-ico" + (item.up ? "" : " off");
+        ico.alt = "";
+        ico.src = item.up ? "icons/wifi-on.svg" : "icons/wifi-off.svg";
+        node.appendChild(ico);
+      } else {
+        var dot = document.createElement("span");
+        dot.className = "dot" + (item.up ? "" : " off");
+        node.appendChild(dot);
+      }
 
       var text = document.createElement("span");
       text.textContent = item.sub ? item.label + " · " + item.sub : item.label;
@@ -494,6 +503,11 @@
         renderRail();
         if (state.zone === "rail") paintFocus();
       }, function () { /* read-only probe; ignore */ });
+      window.tizen.systeminfo.getPropertyValue("WIFI_NETWORK", function (wifi) {
+        state.wifiSsid = (wifi && wifi.ssid) || "";
+        renderRail();
+        if (state.zone === "rail") paintFocus();
+      }, function () { /* no ssid */ });
     } catch (e) { /* older firmware */ }
   }
 
@@ -597,6 +611,8 @@
       setFocusedTile(gridNodes[state.gridIndex]);
       movePlate(el.gridPlate, gridNodes[state.gridIndex]);
       movePlate(el.dockPlate, null);
+      setChips(el.utils, -1);
+      setChips(el.rail, -1);
       var app = state.grid[state.gridIndex];
       setStack(el.eyebrowStack, state.editing ? "edit" : "apps");
       showTitle("grid", state.grid.map(function (a) { return labelFor(a); }),
@@ -624,6 +640,8 @@
       setFocusedTile(null);
       movePlate(el.dockPlate, null);
       movePlate(el.gridPlate, null);
+      setChips(el.utils, -1);
+      setChips(el.rail, -1);
       el.npCard.classList.add("focus");
       setStack(el.eyebrowStack, "music");
       showTitle("music", [np ? np.title : "Now playing"], 0);
@@ -648,6 +666,8 @@
     setFocusedTile(dockNodes[state.dockIndex]);
     movePlate(el.dockPlate, dockNodes[state.dockIndex]);
     movePlate(el.gridPlate, null);
+    setChips(el.utils, -1);
+    setChips(el.rail, -1);
     var current = state.dock[state.dockIndex];
     setGlow(current);
     setStack(el.eyebrowStack, state.reordering ? "reorder" : "apps");

@@ -54,12 +54,47 @@ the stock `_` — accepted by the router on this firmware.
 Push the stock DB back the same way, then power-cycle. The stock file is
 `app-context-STOCK.db` in this repo's backup folder, SHA `86205ef1…`.
 
+## Boot and wake (the first screen)
+
+The first screen is not `first_screen/type` alone. On this firmware the
+boot/wake app lives in keys that already exist, so `vconftool` can overwrite
+them:
+
+- `db/appfw/home_appid` — stock `org.tizen.tv-viewer`
+- `db/appfw/booting_appid_backup` — stock `org.tizen.tv-viewer`
+- `db/first_screen/type` — stock `com.samsung.tv.csfs`
+
+Set all three to `tvunlock02.Launcher`, then power-cycle:
+
+~~~bash
+vconftool set -f -t string db/appfw/home_appid tvunlock02.Launcher
+vconftool set -f -t string db/appfw/booting_appid_backup tvunlock02.Launcher
+vconftool set -f -t string db/first_screen/type tvunlock02.Launcher
+~~~
+
+Restore the stock first screen:
+
+~~~bash
+vconftool set -f -t string db/appfw/home_appid org.tizen.tv-viewer
+vconftool set -f -t string db/appfw/booting_appid_backup org.tizen.tv-viewer
+vconftool set -f -t string db/first_screen/type com.samsung.tv.csfs
+~~~
+
+The rule that mattered: **existing** system keys can be overwritten by `sdk`;
+*missing* keys cannot be created. `db/appfw/startup_appid` does not exist, so
+writing it returns "Operation not permitted" — which is what led us to wrongly
+believe all of vconf was locked.
+
 ## Known limits
 
-- **Boot is unchanged.** `db/first_screen/type = com.samsung.tv.csfs` lives in
-  vconf/buxton and is still not writable from UID 901, so power-on still opens
-  Samsung Home. This captures the Home **button**, not the boot screen.
-- **A firmware update can restore the stock file.** Re-apply after any update.
+- **Warm wake (remote standby) resumes Clean Home. Cold boot still opens the TV
+  viewer.** The cold-boot key `db/appfw/startup_appid` does not exist on this
+  firmware, and `sdk` cannot create a system key, so boot falls back to the
+  hardcoded `org.tizen.tv-viewer`. `app_onboot` is native-only and never set
+  on a `webapp`. A webapp launcher can own warm wake and the Home key, but not
+  the cold-boot first screen.
+- **A firmware update can restore these keys and the stock DB.** Re-apply after
+  any update.
 - It is a data-plane write, reversible, no root, no boot loader, no system app
   replacement. Clean Home remains a normal sideloaded app.
 

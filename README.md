@@ -47,11 +47,18 @@ launcher.
 
 ---
 
-## Part 2 — Home button opens Clean Home
+## Part 2 — Home button and boot open Clean Home
 
-On **Tizen 6** the Home key is a row in a database, not a root setting. One
-reversible write repoints it. Follow [docs/HOME-BUTTON.md](docs/HOME-BUTTON.md),
-then power-cycle the TV.
+On **Tizen 6** neither the Home key nor the first screen is a root setting — both
+are reversible data writes.
+
+- **Home key:** a row in `app-context.db.key_filter`
+- **Boot/wake:** `db/appfw/home_appid`, `db/appfw/booting_appid_backup`, and
+  `db/first_screen/type` in vconf
+
+Follow [docs/HOME-BUTTON.md](docs/HOME-BUTTON.md), then power-cycle the TV. The
+rule that matters: existing system keys can be overwritten by `sdk`; missing ones
+cannot be created.
 
 On Tizen 8/9/10 the same result uses a native setter or temporary root (see the
 version table). The app install in Part 1 is identical.
