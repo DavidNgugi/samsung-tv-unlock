@@ -134,7 +134,8 @@
     muBtns: document.querySelectorAll(".mu-btn")
   };
 
-  var SPOTIFY_URL = "http://192.168.100.24:8795";
+  var SPOTIFY_URL = (window.TV_CONFIG && window.TV_CONFIG.spotifyUrl) ||
+    "http://192.168.100.24:8795";
   var PLAY_ICON = '<svg viewBox="0 0 24 24" width="30" height="30" fill="#f3f5f8"><path d="M8 5l11 7-11 7z"/></svg>';
   var PAUSE_ICON = '<svg viewBox="0 0 24 24" width="30" height="30" fill="#f3f5f8"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
   var np = null;

@@ -179,6 +179,10 @@ the hero, 16–20px tile corners, frosted pills, and an ambient glow in the
 focused app's colour. Press `Up` → **Theme** to cycle **Obsidian**, **Aurora**
 and **Six columns**; the choice persists.
 
+**Setup on another TV.** [docs/SETUP.md](docs/SETUP.md) covers certificates,
+per-user Spotify apps, running the bridge as a launchd/systemd service, and what is
+per-user versus shared.
+
 **Now playing.** A Spotify Connect card and control panel, fed by a local
 service rather than Tizen (the TV exposes no media session). See
 [docs/spotify.md](docs/spotify.md).
