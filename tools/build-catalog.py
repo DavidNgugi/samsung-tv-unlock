@@ -14,21 +14,40 @@ USER_IDS = {
  "com.samsung.tv.music-flex","com.samsung.tv.mycontents",
  "org.tizen.ScreenMirroring-app-tv","org.tizen.remotepc"
 }
-BRAND_PREFIXES = ["netflix","youtube","prime video","spotify","plex","disney",
- "apple tv","dstv","globoplay","google play"]
+BRAND_PREFIXES = ["netflix","youtube","prime video","spotify","plex","dstv"]
+
+HIDE_IDS = {
+ "adplatform.ADPlayer","aQjWjLsPaO.MultiScreenWebLauncher","NRi6kdBYJ0.AirPlayWebApp",
+ "XPkceUl3N4.UsbCamApp","WykOS4t4F0.cmsWebApp","jPPp4KCHp4.emanual","Oxv5Tb6i2d.SmartTV",
+ "tv6pbVMQFF.PrivacyChoices","yL49PNFmjW.service","yL49PNFmjW.PromotionApp",
+ "J9fZJDMi1v.SecurityCenter","ZODRT12q2l.WebAccountExtension"
+}
+SAMSUNG_KEEP = {
+ "com.samsung.tv.gallery","org.tizen.browser","com.samsung.tv.coba.livetv",
+ "com.samsung.tv.coba.source","org.tizen.ambientapp"
+}
+TECH = ("daemon","framework","protocol","manager","support","hotel","preview",
+        "continuewatching","ep-","ewbs","p2p-","csapi","ug-","tvs-lite","agent",
+        "provider","panel","service")
 
 PREFERRED = {
  "netflix":"org.tizen.netflix-app","youtube":"9Ur5IzDKqV.TizenYouTube",
  "prime video":"org.tizen.primevideo","spotify":"rJeHak5zRg.Spotify",
- "plex":"kIciSQlYEM.plex","globoplay":"org.tizen.globoplayapp"
+ "plex":"kIciSQlYEM.plex"
 }
 
 def curated(a):
-    if a["id"].endswith("-dummy"): return False
-    n = a["name"].lower()
+    i = a["id"]
+    n = (a["name"] or "").lower()
+    if i in ("tvunlock02.Launcher","tvunlock01.Peregrine"): return False
+    if i.endswith("-dummy"): return False
+    if i in HIDE_IDS: return False
+    if i in SAMSUNG_KEEP: return True
     if any(t in n for t in ("test","suite","sample","demo")): return False
-    if a["id"] in USER_IDS: return True
-    return any(n.startswith(t) for t in BRAND_PREFIXES)
+    if any(t in (i + " " + n) for t in TECH): return False
+    if any(n.startswith(t) for t in BRAND_PREFIXES): return True
+    if i.startswith("com.samsung.") or i.startswith("org.tizen."): return False
+    return True
 
 def dedupe(items):
     available = {a["id"] for a in items}

@@ -400,7 +400,8 @@
   function railItems() {
     return [
       { key: "wifi", label: "Wi-Fi", sub: state.network === "WIFI" ? "connected" : "not connected", up: state.network === "WIFI" },
-      { key: "inputs", label: "Inputs", sub: "HDMI · AV · Live TV" }
+      { key: "inputs", label: "Inputs", sub: "HDMI · AV · Live TV" },
+      { key: "ambient", label: "Ambient", sub: "Art and ambience" }
     ];
   }
 
@@ -653,6 +654,7 @@
     if (state.zone === "rail") {
       var rail = railItems()[state.railIndex];
       if (rail.key === "wifi") { launch({ id: NETWORK_SETTINGS, name: "Wi-Fi" }); return; }
+      if (rail.key === "ambient") { launch({ id: "org.tizen.ambientapp", name: "Ambient" }); return; }
       launch({ id: SOURCE_APP, name: "Inputs" });
       return;
     }
@@ -988,21 +990,61 @@
   /* Only streaming brands get a name-based pass. Samsung's own apps are matched
    * by exact id, because names like "Apps" and "Ambient" also belong to a dozen
    * internal components. */
+  /* Brands the viewer actually uses. Other store apps still pass the
+   * non-Samsung rule below, so a future Disney+ install shows up anyway. */
   var BRAND_PREFIXES = [
-    "netflix", "youtube", "prime video", "spotify", "plex", "disney",
-    "apple tv", "dstv", "globoplay", "google play"
+    "netflix", "youtube", "prime video", "spotify", "plex", "dstv"
+  ];
+
+  /* Samsung apps worth keeping in All apps. Everything else Samsung ships is
+   * hidden behind the "Show all apps" tile. */
+  var SAMSUNG_KEEP = [
+    "com.samsung.tv.gallery",
+    "org.tizen.browser",
+    "com.samsung.tv.coba.livetv",
+    "com.samsung.tv.coba.source",
+    "org.tizen.ambientapp"
+  ];
+
+  /* Samsung components that use store-style package ids and must not be
+   * mistaken for apps the viewer installed. */
+  var HIDE_IDS = [
+    "adplatform.ADPlayer",
+    "aQjWjLsPaO.MultiScreenWebLauncher",
+    "NRi6kdBYJ0.AirPlayWebApp",
+    "XPkceUl3N4.UsbCamApp",
+    "WykOS4t4F0.cmsWebApp",
+    "jPPp4KCHp4.emanual",
+    "Oxv5Tb6i2d.SmartTV",
+    "tv6pbVMQFF.PrivacyChoices",
+    "yL49PNFmjW.service",
+    "yL49PNFmjW.PromotionApp",
+    "J9fZJDMi1v.SecurityCenter",
+    "ZODRT12q2l.WebAccountExtension"
   ];
 
   function isCurated(app) {
     if (!app || !app.id) return false;
+    if (app.id === SELF || app.id === "tvunlock01.Peregrine") return false;
     if (/-dummy$/.test(app.id)) return false;
-    if (/(test|suite|sample|demo)/i.test(app.name || "")) return false;
-    if (USER_IDS.indexOf(app.id) >= 0) return true;
+    if (HIDE_IDS.indexOf(app.id) >= 0) return false;
+    if (SAMSUNG_KEEP.indexOf(app.id) >= 0) return true;
+
     var name = String(app.name || "").toLowerCase();
+    if (/(test|suite|sample|demo)/i.test(name)) return false;
+
+    // Samsung components that do not use a com.samsung/org.tizen id.
+    if (/(daemon|framework|protocol|manager|support|hotel|preview|continuewatching|ep-|ewbs|p2p-|csapi|ug-|tvs-lite|agent|provider|panel|service)/i
+        .test(app.id + " " + name)) return false;
+
     for (var i = 0; i < BRAND_PREFIXES.length; i++) {
       if (name.indexOf(BRAND_PREFIXES[i]) === 0) return true;
     }
-    return false;
+
+    // Everything not shipped by Samsung is an app the viewer installed.
+    if (app.id.indexOf("com.samsung.") === 0) return false;
+    if (app.id.indexOf("org.tizen.") === 0) return false;
+    return true;
   }
 
   function brandKey(name) {

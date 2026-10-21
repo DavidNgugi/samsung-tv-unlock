@@ -2,7 +2,7 @@
 
 Generated from getAppsInfo() on **UA65AU8000UXKE** (Tizen 6.0), 21 Oct 2026.
 The TV reported **393** entries and marks **205** visible.
-Clean Home shows **17** by default and hides the rest behind *Show all apps*.
+Clean Home shows **13** by default and hides the rest behind *Show all apps*.
 
 Descriptions are inferred from the app id and name unless marked otherwise.
 Samsung does not publish a per-model app manifest, so treat this as a map, not gospel.
@@ -11,22 +11,18 @@ Samsung does not publish a per-model app manifest, so treat this as a map, not g
 
 | App | Id | Shown | What it does |
 | --- | --- | --- | --- |
+| AmbientApp | org.tizen.ambientapp | yes | Samsung internal component |
 | Apps | org.volt.apps | yes | The TV app store and app list shell. |
 | DStv Stream | CXNLCPYe82.dstvnow | yes | DStv Stream (Africa). |
 | Gallery | com.samsung.tv.gallery | yes | Gallery: photos and videos from USB or network. |
-| globoplay video | org.tizen.globoplayapp | yes | Globoplay (Brazil). |
-| GooglePlayMovie | com.samsung.tv.cobalt-gpm | yes | Google Play Movies and TV. |
 | Internet | org.tizen.browser | yes | Samsung Internet, the TV web browser. |
 | LiveTV | com.samsung.tv.coba.livetv | yes | Live TV (tuner). |
-| Music Flex | com.samsung.tv.music-flex | yes | Music wall and visualiser. |
-| MyContents | com.samsung.tv.mycontents | yes | My Contents: personal media shelf. |
 | Netflix | org.tizen.netflix-app | yes | Netflix. Streaming. |
 | Plex - Free Movies ＆ TV | kIciSQlYEM.plex | yes | Plex. Local and streaming media. |
 | Prime Video | org.tizen.primevideo | yes | Prime Video. Streaming. |
-| Remote PC launcher | org.tizen.remotepc | yes | Remote PC: connect to a Windows PC. |
-| ScreenMirroring-app-tv | org.tizen.ScreenMirroring-app-tv | yes | Screen mirroring receiver. |
 | Source | com.samsung.tv.coba.source | yes | Source picker: HDMI, AV, Live TV. |
 | Spotify - Music and Podcasts | rJeHak5zRg.Spotify | yes | Spotify. |
+| Tarmac Race | M4UT1lus28.tarmacRace | yes | Tarmac Race, a preloaded game. |
 | YouTube | 9Ur5IzDKqV.TizenYouTube | yes | YouTube. Streaming. |
 
 ## Hidden by default
@@ -39,7 +35,6 @@ Samsung does not publish a per-model app manifest, so treat this as a map, not g
 |  RM survey popup  | org.tizen.rm-survey | no | Research / survey |
 | AdPlayer | com.samsung.tv.adplayer | no | Advertising player |
 | AgingApp | org.tizen.AgingApp | no | Samsung internal component |
-| AmbientApp | org.tizen.ambientapp | no | Samsung internal component |
 | AmbientFTE | com.samsung.tv.ambientfte | no | Samsung internal component |
 | AmbientSetting | com.samsung.tv.coba.ambientsetting | no | Settings component |
 | AmbientSupport | com.samsung.tv.ambient-support | no | Samsung internal component |
@@ -126,7 +121,9 @@ Samsung does not publish a per-model app manifest, so treat this as a map, not g
 | function-osd | org.tizen.function-osd | no | Samsung internal component |
 | Gamebar | com.samsung.tv.gamebar | no | Game Bar overlay for consoles. |
 | globoplay | org.tizen.globoplayaria | no | Globoplay companion shell. |
+| globoplay video | org.tizen.globoplayapp | no | Globoplay (Brazil). |
 | google-fullscreen-app | com.samsung.tv.google-fullscreen-app | no | Screen/mirroring |
+| GooglePlayMovie | com.samsung.tv.cobalt-gpm | no | Google Play Movies and TV. |
 | hbbtv | org.tizen.hbbtv | no | Bluetooth |
 | HdmiCec | org.tizen.hdmicec | no | Samsung internal component |
 | hitcomp | com.samsung.hitcomp | no | Samsung internal component |
@@ -142,6 +139,8 @@ Samsung does not publish a per-model app manifest, so treat this as a map, not g
 | Mono Mat | com.samsung.tv.artpaint-tpl | no | Mono Mat / art template. |
 | MultiScreen | com.samsung.tv.multiscreen | no | Screen/mirroring |
 | MultiViewSetupApp | com.samsung.tv.multiviewsetupapp | no | Samsung internal component |
+| Music Flex | com.samsung.tv.music-flex | no | Music wall and visualiser. |
+| MyContents | com.samsung.tv.mycontents | no | My Contents: personal media shelf. |
 | NetworkSetting-Tizen | org.tizen.NetworkSetting-Tizen | no | Settings component |
 | nfc-monitor | com.samsung.tv.nfc-daemon | no | Background daemon |
 | nfc-monitor | com.samsung.tv.nfc-monitor | no | Samsung internal component |
@@ -167,6 +166,7 @@ Samsung does not publish a per-model app manifest, so treat this as a map, not g
 | registerav | org.tizen.registerav | no | Samsung internal component |
 | registertv | org.tizen.registertv | no | Samsung internal component |
 | Remote Management | org.tizen.remote-management | no | Samsung internal component |
+| Remote PC launcher | org.tizen.remotepc | no | Remote PC: connect to a Windows PC. |
 | remote-worksapce | com.samsung.tv.remote-workspace | no | Samsung internal component |
 | Remoteworkspace | com.samsung.tv.coba.remoteworkspace | no | Samsung internal component |
 | RequestSupport | org.tizen.request-support | no | Samsung internal component |
@@ -181,6 +181,7 @@ Samsung does not publish a per-model app manifest, so treat this as a map, not g
 | Samsung Promotion | yL49PNFmjW.PromotionApp | no | Samsung internal component |
 | Samsung Remote Key Guide | com.samsung.tv.remoteguide | no | Samsung internal component |
 | Samsung Remote Key Guide View | com.samsung.tv.coba.remoteguide | no | Samsung internal component |
+| ScreenMirroring-app-tv | org.tizen.ScreenMirroring-app-tv | no | Screen mirroring receiver. |
 | Search | com.samsung.tv.coba.home | no | Samsung internal component |
 | Search | com.samsung.tv.coba.search | no | Samsung internal component |
 | Security Center | J9fZJDMi1v.SecurityCenter | no | Security component |
@@ -198,7 +199,6 @@ Samsung does not publish a per-model app manifest, so treat this as a map, not g
 | SoundbarOOBEApp | com.samsung.tv.aispeaker-oobe-app | no | Samsung internal component |
 | Stadia | com.samsung.tv.cobalt-stadia | no | Stadia shell; the service is discontinued. |
 | Sync Demo Gui | org.tizen.UsbSyncDisplay.gui | no | Demo component |
-| Tarmac Race | M4UT1lus28.tarmacRace | no | Tarmac Race, a preloaded game. |
 | TGAgentUIApp | com.samsung.tv.TGAgentUIApp | no | Background agent |
 | TV App autosetup-channel-list | com.samsung.tv.autosetup-channel-list | no | Samsung internal component |
 | TV App channel-search | org.tizen.channel-search | no | Samsung internal component |
@@ -224,7 +224,7 @@ Samsung does not publish a per-model app manifest, so treat this as a map, not g
 
 ## Category counts
 
-- Samsung internal component: 87
+- Samsung internal component: 86
 - Hotel-mode component: 13
 - Settings component: 7
 - Launcher shell: 6
@@ -257,12 +257,17 @@ Samsung does not publish a per-model app manifest, so treat this as a map, not g
 - Factory tooling: 1
 - Game Bar overlay for consoles.: 1
 - Globoplay companion shell.: 1
+- Globoplay (Brazil).: 1
+- Google Play Movies and TV.: 1
 - Knox security: 1
 - Mono Mat / art template.: 1
+- Music wall and visualiser.: 1
+- My Contents: personal media shelf.: 1
 - Placeholder entry: 1
+- Remote PC: connect to a Windows PC.: 1
+- Screen mirroring receiver.: 1
 - Stadia shell; the service is discontinued.: 1
 - Demo component: 1
-- Tarmac Race, a preloaded game.: 1
 - Background agent: 1
 - YouTube (Cobalt wrapper); duplicate of the Tizen YouTube app.: 1
 - YouTube Kids.: 1
