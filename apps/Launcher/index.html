@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Clean Home</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage" class="stage">
+  <div class="bg"></div>
+  <div id="glow" class="glow"></div>
+
+  <div class="clock">
+    <div id="greeting" class="greeting"></div>
+    <div id="time" class="time">--:--</div>
+    <div id="date" class="date"></div>
+  </div>
+
+  <div id="utils" class="utils">
+    <div id="util-plate" class="chip-plate"></div>
+  </div>
+
+  <div class="shelf">
+    <div id="eyebrow-stack" class="eyebrow-stack">
+      <div class="eyebrow" data-k="apps">APPS</div>
+      <div class="eyebrow" data-k="controls">CONTROLS</div>
+      <div class="eyebrow" data-k="quick">QUICK</div>
+      <div class="eyebrow" data-k="edit">EDIT HOME</div>
+    </div>
+    <div id="title-stack" class="title-stack"></div>
+    <div id="sub-stack" class="sub-stack">
+      <p class="sub" data-k="apps">Press OK to open</p>
+      <p class="sub" data-k="quick">Quick controls</p>
+      <p class="sub" data-k="control">Press OK to open</p>
+      <p class="sub" data-k="edit">OK adds or removes</p>
+    </div>
+  </div>
+
+  <div id="dock" class="dock">
+    <div id="dock-plate" class="plate"></div>
+  </div>
+  <div id="rail" class="rail">
+    <div id="rail-plate" class="chip-plate"></div>
+  </div>
+  <div id="grid" class="grid" hidden>
+    <div id="grid-plate" class="plate"></div>
+  </div>
+
+  <div id="empty" class="empty" hidden>
+    <p id="empty-text">No apps found.</p>
+    <p class="hint">Press OK to try again.</p>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</div>
+<script src="main.js"></script>
+</body>
+</html>

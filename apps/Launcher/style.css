@@ -1,0 +1,310 @@
+@font-face {
+  font-family: "Outfit";
+  font-weight: 300;
+  src: url("fonts/outfit-300.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Outfit";
+  font-weight: 500;
+  src: url("fonts/outfit-500.woff2") format("woff2");
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #05080c;
+  color: #f3f5f8;
+  font-family: "Outfit", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: none;
+}
+
+.stage {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  overflow: hidden;
+  transform-origin: 0 0;
+}
+
+/* ---- backdrop ---- */
+.bg {
+  position: absolute; left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  background: #000000;
+  transition: background 400ms linear;
+}
+
+/* Aurora: teal and violet on navy, darker at the bottom. */
+.aurora .bg {
+  background:
+    radial-gradient(900px 620px at 20% 8%, rgba(45, 212, 191, 0.22), transparent 62%),
+    radial-gradient(900px 640px at 82% 4%, rgba(139, 92, 246, 0.26), transparent 64%),
+    linear-gradient(178deg, #0b1220 0%, #070a14 52%, #04060c 100%);
+}
+.bg::after {
+  content: "";
+  position: absolute; left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.05) 42%, rgba(0,0,0,0.62) 100%);
+}
+
+/* Ambient colour of the focused app, felt rather than seen. */
+.glow {
+  position: absolute;
+  left: 50%; bottom: 60px;
+  width: 900px; height: 340px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0.9;
+  background: radial-gradient(ellipse at 50% 100%, rgba(90, 124, 255, 0.14), transparent 66%);
+}
+
+/* ---- clock ---- */
+.clock { position: absolute; left: 96px; top: 64px; }
+.greeting {
+  font-size: 20px; line-height: 28px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: rgba(243,245,248,0.42);
+  margin-bottom: 10px;
+}
+.time { font-size: 52px; line-height: 58px; font-weight: 300; letter-spacing: -1.5px; }
+.date { margin-top: 8px; font-size: 24px; line-height: 32px; color: rgba(243,245,248,0.55); }
+
+/* ---- utilities ---- */
+.utils { position: absolute; right: 96px; top: 64px; display: flex; }
+.util {
+  position: relative;
+  height: 64px; padding: 0 26px;
+  border-radius: 32px;
+  display: flex; align-items: center;
+  font-size: 24px; line-height: 32px;
+  color: rgba(243,245,248,0.78);
+  margin-left: 14px;
+}
+.chip {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  border-radius: inherit;
+  background: rgba(255,255,255,0.30);
+  border: 1px solid rgba(255,255,255,0.36);
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  transition: opacity 80ms linear;
+}
+.util span, .pill span { position: relative; z-index: 1; }
+/* Keep the chip out of that rule: it must stay absolute and fill the pill. */
+.util > .chip, .pill > .chip {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 0;
+}
+
+
+/* ---- shelf caption ---- */
+.shelf { position: absolute; left: 96px; top: 300px; width: 1200px; }
+.eyebrow-stack {
+  position: relative;
+  height: 28px;
+  margin-bottom: 14px;
+}
+.eyebrow {
+  position: absolute; left: 0; top: 0;
+  font-size: 20px; line-height: 28px;
+  letter-spacing: 0.26em; text-transform: uppercase;
+  color: rgba(243,245,248,0.42);
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 80ms linear;
+}
+.title-stack {
+  position: relative;
+  height: 74px;
+}
+.title-item {
+  position: absolute; left: 0; top: 0;
+  font-size: 64px; line-height: 74px;
+  font-weight: 300; letter-spacing: -2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 1200px;
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 80ms linear;
+}
+.sub-stack {
+  position: relative;
+  height: 32px;
+  margin-top: 12px;
+}
+.sub {
+  position: absolute; left: 0; top: 0;
+  font-size: 24px; line-height: 32px;
+  color: rgba(243,245,248,0.55);
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 80ms linear;
+}
+
+/* ---- dock ---- */
+.dock {
+  position: absolute; left: 96px; bottom: 248px;
+  width: 1728px; height: 220px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 40px;
+  border-radius: 40px;
+  background: linear-gradient(170deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.06));
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.45) inset, 0 1px 0 rgba(255,255,255,0.10) inset;
+}
+.dock[hidden] { display: none; }
+
+.tile {
+  position: relative;
+  width: 190px; height: 140px;
+  border-radius: 18px;
+  margin-right: 16px;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 180ms cubic-bezier(.2,.7,.2,1);
+}
+.tile:last-child { margin-right: 0; }
+.tile .mark {
+  font-size: 48px; font-weight: 600; letter-spacing: -2px;
+  opacity: 0.82;
+}
+.tile img {
+  width: 84px; height: 84px;
+  object-fit: contain;
+  opacity: 0.88;
+}
+.tile img.brand { width: 76px; height: 76px; }
+.tile img.brand[src$="primevideo.svg"] { width: 108px; height: 108px; }
+
+/* membership dot in the All apps / Edit Home grid only */
+.grid .tile.on-home::after {
+  content: "";
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.55);
+}
+.tile img, .tile .mark { transform: translateY(-10px); }
+.tile .name {
+  position: absolute;
+  left: 6px; right: 6px; bottom: 8px;
+  text-align: center;
+  font-size: 24px; line-height: 30px; font-weight: 500;
+  letter-spacing: -0.4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 140ms linear;
+}
+.tile.focus {
+  transform: translateZ(0) translateY(-8px) scale(1.04);
+  z-index: 2;
+}
+.tile.focus .name { opacity: 1; }
+.tile.focus .name { opacity: 1; transform: translateY(0); }
+.tile.focus .mark, .tile.focus img { opacity: 1; }
+
+/* One plate, moved with a transform: no per-tile repaint. */
+.plate {
+  position: absolute;
+  left: 0; top: 0;
+  width: 190px; height: 140px;
+  border-radius: 18px;
+  background: linear-gradient(170deg, rgba(255,255,255,0.42), rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.26));
+  border: 1px solid rgba(255,255,255,0.34);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.30) inset;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform, opacity;
+  transition: transform 180ms cubic-bezier(.2,.7,.2,1), opacity 120ms linear;
+}
+.dock .tile, .grid .tile { z-index: 1; }
+
+/* ---- grid ---- */
+.grid {
+  position: absolute;
+  left: 96px; top: 240px;
+  will-change: transform;
+  width: 1728px; height: 720px;
+  display: grid;
+  grid-template-columns: repeat(5, 190px);
+  grid-column-gap: 18px;
+  grid-row-gap: 18px;
+  align-content: start;
+}
+.grid[hidden] { display: none; }
+.grid .tile { margin-right: 0; background: #1c1c1e; }
+.grid .tile .name {
+  opacity: 1; transform: none;
+  font-size: 22px; bottom: 10px;
+  color: rgba(243,245,248,0.72);
+}
+.grid .tile.focus .name { color: #f3f5f8; }
+
+/* ---- states ---- */
+.empty {
+  position: absolute;
+  left: 96px; top: 360px;
+  width: 1728px;
+  text-align: center;
+  font-size: 32px;
+  color: rgba(243,245,248,0.6);
+}
+.empty[hidden] { display: none; }
+.hint { margin-top: 14px; font-size: 24px; color: rgba(243,245,248,0.35); }
+
+/* Quick rail: Wi-Fi status, inputs, settings. */
+.rail {
+  position: absolute;
+  left: 96px; right: 96px; bottom: 132px;
+  height: 84px;
+  display: flex; align-items: center; justify-content: center;
+}
+.rail[hidden] { display: none; }
+.pill {
+  position: relative;
+  height: 64px;
+  padding: 0 28px;
+  margin: 0 8px;
+  border-radius: 32px;
+  display: flex; align-items: center;
+  font-size: 24px; line-height: 32px;
+  color: rgba(243, 245, 248, 0.82);
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.pill .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #4ade80; margin-right: 12px;
+}
+.pill .dot.off { background: #f87171; }
+
+.toast {
+  position: absolute;
+  left: 50%; bottom: 120px;
+  transform: translateX(-50%) translateY(16px);
+  padding: 18px 28px;
+  border-radius: 20px;
+  background: rgba(18, 24, 32, 0.94);
+  border: 1px solid rgba(255,255,255,0.14);
+  font-size: 24px;
+  opacity: 0;
+  transition: opacity 180ms linear, transform 180ms cubic-bezier(.2,.7,.2,1);
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

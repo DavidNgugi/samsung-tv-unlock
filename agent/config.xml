@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets"
+        xmlns:tizen="http://tizen.org/ns/widgets"
+        id="http://tvunlock.local/agent"
+        version="0.1.0"
+        viewmodes="maximized">
+
+  <tizen:application id="tvUnlock.Agent" package="tvUnlock" required_version="2.3"/>
+  <content src="index.html"/>
+  <feature name="http://tizen.org/feature/screen.size.all"/>
+
+  <name>TV Agent</name>
+  <description>Launcher and command agent for the TV unlock bridge.</description>
+
+  <tizen:profile name="tv-samsung"/>
+
+  <tizen:privilege name="http://tizen.org/privilege/internet"/>
+  <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
+  <tizen:privilege name="http://tizen.org/privilege/application.info"/>
+
+  <tizen:setting screen-orientation="landscape"
+                 context-menu="disable"
+                 background-support="disable"
+                 encryption="disable"
+                 install-location="auto"
+                 hwkey-event="enable"/>
+</widget>

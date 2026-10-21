@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shelf concept</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #05080c; }
+  body { font-family: "Helvetica Neue", Arial, sans-serif; color: #f3f5f8; }
+
+  .stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+  /* backdrop: a photographed evening, approximated with gradients */
+  .bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(900px 520px at 74% 18%, rgba(94, 128, 168, 0.55), transparent 62%),
+      radial-gradient(1200px 700px at 22% 78%, rgba(38, 74, 84, 0.55), transparent 66%),
+      linear-gradient(168deg, #16222c 0%, #0d1620 44%, #070b10 100%);
+  }
+  .bg::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(to bottom, rgba(4,8,12,0.55), rgba(4,8,12,0.10) 38%, rgba(4,8,12,0.72) 100%),
+      radial-gradient(1400px 700px at 50% 120%, rgba(0,0,0,0.55), transparent 70%);
+  }
+
+  .clock { position: absolute; left: 96px; top: 64px; }
+  .clock .time { font-size: 48px; line-height: 56px; font-weight: 300; letter-spacing: -1.5px; }
+  .clock .date { margin-top: 8px; font-size: 24px; color: rgba(243,245,248,0.55); letter-spacing: 0.2px; }
+
+  .controls { position: absolute; right: 96px; top: 64px; display: flex; gap: 28px; }
+  .controls span { font-size: 24px; color: rgba(243,245,248,0.62); }
+
+  .shelf { position: absolute; left: 96px; top: 322px; }
+  .shelf .eyebrow {
+    font-size: 20px; letter-spacing: 0.26em; text-transform: uppercase;
+    color: rgba(243,245,248,0.42); margin-bottom: 14px;
+  }
+  .shelf h1 { font-size: 52px; line-height: 60px; font-weight: 300; letter-spacing: -1.6px; }
+  .shelf p { margin-top: 12px; font-size: 24px; color: rgba(243,245,248,0.55); }
+
+  .dock {
+    position: absolute; left: 96px; right: 96px; bottom: 92px; height: 240px;
+    display: flex; align-items: center; gap: 28px;
+    padding: 0 40px; border-radius: 40px;
+    background: linear-gradient(170deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.06));
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45) inset, 0 1px 0 rgba(255,255,255,0.10) inset;
+    backdrop-filter: blur(10px);
+  }
+
+  .tile {
+    position: relative; width: 288px; height: 200px; border-radius: 32px;
+    display: flex; align-items: flex-end; justify-content: center;
+    transition: transform 180ms cubic-bezier(.2,.7,.2,1);
+  }
+  .tile .mark {
+    position: absolute; left: 0; right: 0; top: 44px; text-align: center;
+    font-size: 64px; font-weight: 600; letter-spacing: -2px; opacity: 0.82;
+  }
+  .tile .name {
+    font-size: 30px; line-height: 40px; font-weight: 500; letter-spacing: -0.6px;
+    opacity: 0; transform: translateY(4px); transition: opacity 160ms linear, transform 180ms cubic-bezier(.2,.7,.2,1);
+    padding-bottom: 18px;
+  }
+  .tile.focus { transform: translateY(-10px) scale(1.05); }
+  .tile.focus::before {
+    content: ""; position: absolute; inset: 0; border-radius: 32px;
+    background: linear-gradient(170deg, rgba(255,255,255,0.34), rgba(255,255,255,0.14) 58%, rgba(255,255,255,0.20));
+    border: 1px solid rgba(255,255,255,0.28);
+    box-shadow: 0 26px 60px rgba(0,0,0,0.42), 0 1px 0 rgba(255,255,255,0.34) inset;
+  }
+  .tile.focus .name { opacity: 1; transform: translateY(0); }
+  .tile.focus .mark { opacity: 1; transform: translateY(-4px); }
+
+  .glow {
+    position: absolute; left: 50%; bottom: 210px; width: 900px; height: 320px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(229, 9, 20, 0.18), transparent 65%);
+    filter: blur(10px);
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="bg"></div>
+
+    <div class="clock">
+      <div class="time">21:04</div>
+      <div class="date">Tuesday 21 October</div>
+    </div>
+
+    <div class="controls">
+      <span>Inputs</span><span>Settings</span>
+    </div>
+
+    <div class="shelf">
+      <div class="eyebrow">Continue</div>
+      <h1>Netflix</h1>
+      <p>Press OK to open · Back for Samsung Home</p>
+    </div>
+
+    <div class="glow"></div>
+
+    <div class="dock">
+      <div class="tile"><div class="mark">▶</div><div class="name">YouTube</div></div>
+      <div class="tile focus"><div class="mark">N</div><div class="name">Netflix</div></div>
+      <div class="tile"><div class="mark">▷</div><div class="name">Prime Video</div></div>
+      <div class="tile"><div class="mark">♫</div><div class="name">Spotify</div></div>
+      <div class="tile"><div class="mark">⌂</div><div class="name">All apps</div></div>
+    </div>
+  </div>
+</body>
+</html>

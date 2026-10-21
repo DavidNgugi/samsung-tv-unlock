@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>TV Agent</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="glow"></div>
+
+  <main>
+    <header>
+      <div class="brand">TV Agent</div>
+      <div class="clock">
+        <div id="time">--:--</div>
+        <div id="date"></div>
+      </div>
+    </header>
+
+    <section id="shelf">
+      <div id="shelf-label">Apps</div>
+    </section>
+
+    <section id="grid" role="listbox" aria-label="Applications"></section>
+
+    <div id="empty" hidden>
+      <p>No apps yet.</p>
+      <p class="hint">Start the bridge and press <b>Enter</b> to retry, or add apps in
+      <code>tools/bridge_stub.py</code>.</p>
+    </div>
+  </main>
+
+  <footer>
+    <span id="dot" class="dot"></span>
+    <span id="status">starting</span>
+    <span id="bridge-url" class="dim"></span>
+    <span class="keys">Arrows move · Enter opens</span>
+  </footer>
+
+  <script src="bridge.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
