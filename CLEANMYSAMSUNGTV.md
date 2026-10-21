@@ -481,6 +481,12 @@ Home to get back to Smart Hub.
 
 ### 8.2 The minimum safe backup today
 
+Run `tools/backup-tv.sh`. It writes to `~/Backups/cleanmysamsungtv/<timestamp>/`:
+API metadata, the 393-app list, source tree, built `.wgt`, certificate profile,
+remote token, Spotify token, an access probe, and `SHA256SUMS`. It also generates
+`RESTORE.md` with the uninstall command and an explicit list of what could not be
+captured.
+
 Tier 0 needs almost nothing: the certificate folder and the source. Copy them
 somewhere that is not the TV and not the repo:
 

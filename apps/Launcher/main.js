@@ -144,7 +144,7 @@
   var utils = [
     { key: "all", label: "All apps" },
     { key: "edit", label: "Edit Home" },
-    { key: "manage", label: "Manage" },
+    { key: "store", label: "App Store" },
     { key: "music", label: "Music" },
     { key: "theme", label: "Theme" },
     { key: "home", label: "Samsung Home" }
@@ -679,6 +679,21 @@
     }
   }
 
+  function launchStore() {
+    var ids = ["com.samsung.tv.store", "com.samsung.tv.coba.apps", "org.volt.apps"];
+    if (!hasTizen()) { toast("Preview: would open the App Store"); return; }
+    function attempt(i) {
+      if (i >= ids.length) { toast("Could not open the App Store"); return; }
+      try {
+        window.tizen.application.launch(ids[i], function () { /* opened */ },
+          function () { attempt(i + 1); });
+      } catch (e) {
+        attempt(i + 1);
+      }
+    }
+    attempt(0);
+  }
+
   function toggleHome(app) {
     if (!app) return;
     if (blockedOnHome(app)) { toast("Not available for Home"); return; }
@@ -828,15 +843,7 @@
     if (state.zone === "card") { openMusic(); return; }
     if (state.view === "grid") {
       var app = state.grid[state.gridIndex];
-      if (app && app.id === "__toggle") {
-        store.showAll = !store.showAll;
-        saveStore();
-        state.grid = visibleApps();
-        state.gridIndex = Math.max(0, state.grid.length - 1);
-        renderGrid();
-        paintFocus();
-        return;
-      }
+      if (!state.grid.length) { paintFocus(); return; }
       if (state.editing) { toggleHome(app); return; }
       launch(app);
       return;
@@ -859,7 +866,7 @@
       var util = utils[state.utilIndex];
       if (util.key === "all") { showGrid(false); return; }
       if (util.key === "edit") { showGrid(true); return; }
-      if (util.key === "manage") { launch({ id: "org.volt.apps", name: "Apps" }); return; }
+      if (util.key === "store") { launchStore(); return; }
       if (util.key === "music") { openMusic(); return; }
       if (util.key === "theme") { cycleTheme(); return; }
       launch({ id: SAMSUNG_HOME, name: "Samsung Home" });
@@ -1425,16 +1432,9 @@
   }
 
   function visibleApps() {
-    var list = store.showAll ? state.apps.slice() : dedupeBrands(state.apps.filter(isCurated));
-    if (!state.editing) {
-      list = list.slice();
-      list.push({
-        id: "__toggle",
-        name: store.showAll ? "Show fewer apps" : "Show all apps",
-        count: state.apps.length
-      });
-    }
-    return list;
+    // Only curated, viewer-facing apps. Samsung's internals are never listed;
+    // there is no "show all" escape hatch in the UI.
+    return dedupeBrands(state.apps.filter(isCurated));
   }
 
   var APPS_CACHE = "cleanhome.apps.v1";
