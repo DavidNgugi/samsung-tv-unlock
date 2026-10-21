@@ -179,6 +179,10 @@ the hero, 16–20px tile corners, frosted pills, and an ambient glow in the
 focused app's colour. Press `Up` → **Theme** to cycle **Obsidian**, **Aurora**
 and **Six columns**; the choice persists.
 
+**Now playing.** A Spotify Connect card and control panel, fed by a local
+service rather than Tizen (the TV exposes no media session). See
+[docs/spotify.md](docs/spotify.md).
+
 **Performance.** [docs/performance.md](docs/performance.md) is a full guide: ten
 rules, measured anti-patterns, the working focus recipe, a profiling method and a
 pre-ship checklist. On this TV focus went from 5–12 fps to 62 fps, and the

@@ -347,6 +347,13 @@ Short version: focus may change **only** `transform` and `opacity` on promoted
 layers; one floating highlight; pre-render text that changes on focus; cache
 `getAppsInfo`; profile on the TV, never the desktop browser.
 
+### 5.6 Now Playing (Spotify only)
+
+Tizen 6.0 gives third-party apps no media session, so a native-style now-playing
+widget cannot read the TV's playback. The workaround is Spotify Connect: a local
+service talks to Spotify's Web API and the launcher renders the card and controls.
+Setup, endpoints and limits are in [spotify.md](spotify.md).
+
 ## 6. The Home button: the part that is not an app
 
 Installing a launcher does **not** make it Home. The Home button still opens

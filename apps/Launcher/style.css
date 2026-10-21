@@ -310,3 +310,164 @@ html, body {
   pointer-events: none;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+
+/* ---- now playing ---- */
+.np-card {
+  position: absolute;
+  right: 96px; top: 150px;
+  width: 620px; height: 132px;
+  display: flex; align-items: center;
+  gap: 28px;
+  padding: 14px 24px;
+  border-radius: 22px;
+  background: linear-gradient(150deg, rgba(30,38,50,0.94), rgba(12,16,22,0.94));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  z-index: 3;
+}
+.np-card[hidden] { display: none; }
+.np-card.focus {
+  border-color: rgba(255,255,255,0.92);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.78), 0 24px 55px rgba(0,0,0,0.6);
+  background: linear-gradient(150deg, rgba(46,58,74,0.98), rgba(16,22,30,0.98));
+  transform: scale(1.03);
+}
+.np-art-wrap {
+  position: relative;
+  width: 104px; height: 104px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.06);
+  flex: none;
+}
+.np-art { width: 100%; height: 100%; object-fit: cover; display: none; }
+.np-art.on { display: block; }
+.np-note {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; color: rgba(243,245,248,0.35);
+}
+.np-body { flex: 1; min-width: 0; padding-left: 6px; }
+.np-title {
+  font-size: 30px; line-height: 38px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.np-artist {
+  font-size: 20px; line-height: 28px;
+  color: rgba(243,245,248,0.55);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.np-bar {
+  height: 4px; margin-top: 14px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.14);
+  overflow: hidden;
+}
+.np-fill {
+  height: 100%; width: 0;
+  background: rgba(255,255,255,0.82);
+  border-radius: 2px;
+  transition: width 500ms linear;
+}
+.np-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: rgba(243,245,248,0.34);
+}
+.np-state {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.16);
+  flex: none;
+}
+
+.music {
+  position: absolute; inset: 0;
+  z-index: 30;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.72);
+}
+.music[hidden] { display: none; }
+.music-card {
+  width: 980px;
+  padding: 48px 56px 40px;
+  border-radius: 32px;
+  background: linear-gradient(150deg, rgba(32,40,52,0.98), rgba(10,14,20,0.98));
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 40px 90px rgba(0,0,0,0.55);
+}
+.mu-top { display: flex; gap: 48px; }
+.mu-art-wrap {
+  position: relative;
+  width: 240px; height: 240px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.06);
+  flex: none;
+}
+.mu-art { width: 100%; height: 100%; object-fit: cover; display: none; }
+.mu-art.on { display: block; }
+.mu-note {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 72px; color: rgba(243,245,248,0.3);
+}
+.mu-meta { flex: 1; min-width: 0; padding-left: 6px; display: flex; flex-direction: column; justify-content: center; }
+.mu-kicker {
+  font-size: 16px; line-height: 24px;
+  letter-spacing: 0.24em;
+  color: rgba(243,245,248,0.42);
+}
+.mu-title {
+  margin-top: 10px;
+  font-size: 46px; line-height: 56px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mu-artist {
+  margin-top: 6px;
+  font-size: 26px; line-height: 34px;
+  color: rgba(243,245,248,0.58);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mu-bar {
+  height: 6px; margin-top: 30px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.14);
+  overflow: hidden;
+}
+.mu-fill {
+  height: 100%; width: 0;
+  background: rgba(255,255,255,0.85);
+  border-radius: 3px;
+  transition: width 500ms linear;
+}
+.mu-times {
+  display: flex; justify-content: space-between;
+  margin-top: 10px;
+  font-size: 18px;
+  color: rgba(243,245,248,0.45);
+}
+.mu-controls {
+  display: flex; justify-content: center; align-items: center;
+  gap: 40px;
+  margin-top: 38px;
+}
+.mu-btn {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.16);
+  transition: transform 120ms ease-out, background 120ms linear;
+  will-change: transform;
+}
+.mu-btn.focus {
+  transform: scale(1.10);
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.55);
+}
+.mu-btn svg { display: block; }

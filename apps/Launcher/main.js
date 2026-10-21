@@ -77,6 +77,8 @@
     titleKey: "",
     titleIndex: -1,
     focusedTile: null,
+    musicOpen: false,
+    musicIndex: 1,
     reordering: false,
     reorderOriginal: null,
     holdTimer: null,
@@ -113,13 +115,36 @@
     emptyText: document.getElementById("empty-text"),
     toast: document.getElementById("toast"),
     glow: document.getElementById("glow"),
-    greeting: document.getElementById("greeting")
+    greeting: document.getElementById("greeting"),
+    npCard: document.getElementById("np-card"),
+    npArt: document.getElementById("np-art"),
+    npNote: document.getElementById("np-note"),
+    npTitle: document.getElementById("np-title"),
+    npArtist: document.getElementById("np-artist"),
+    npFill: document.getElementById("np-fill"),
+    npState: document.getElementById("np-state"),
+    music: document.getElementById("music"),
+    muArt: document.getElementById("mu-art"),
+    muNote: document.getElementById("mu-note"),
+    muTitle: document.getElementById("mu-title"),
+    muArtist: document.getElementById("mu-artist"),
+    muFill: document.getElementById("mu-fill"),
+    muPos: document.getElementById("mu-pos"),
+    muDur: document.getElementById("mu-dur"),
+    muBtns: document.querySelectorAll(".mu-btn")
   };
+
+  var SPOTIFY_URL = "http://192.168.100.24:8795";
+  var PLAY_ICON = '<svg viewBox="0 0 24 24" width="30" height="30" fill="#f3f5f8"><path d="M8 5l11 7-11 7z"/></svg>';
+  var PAUSE_ICON = '<svg viewBox="0 0 24 24" width="30" height="30" fill="#f3f5f8"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+  var np = null;
+  var npTimer = null;
 
   var utils = [
     { key: "all", label: "All apps" },
     { key: "edit", label: "Edit Home" },
     { key: "manage", label: "Manage" },
+    { key: "music", label: "Music" },
     { key: "theme", label: "Theme" },
     { key: "home", label: "Samsung Home" }
   ];
@@ -425,6 +450,7 @@
 
   function railItems() {
     return [
+      { key: "music", label: "Music", sub: "Spotify" },
       { key: "wifi", label: "Wi-Fi", sub: state.network === "WIFI" ? "connected" : "not connected", up: state.network === "WIFI" },
       { key: "hdmi1", label: "HDMI 1", sub: "" },
       { key: "hdmi2", label: "HDMI 2", sub: "" },
@@ -562,6 +588,7 @@
 
   function paintFocus() {
     setGlow(null);
+    if (el.npCard) el.npCard.classList.remove("focus");
 
     if (state.view === "grid") {
       var gridNodes = el.grid.querySelectorAll(".tile");
@@ -588,6 +615,17 @@
       setStack(el.eyebrowStack, "quick");
       showTitle("rail", railItems().map(function (r) { return r.label; }), state.railIndex);
       setStack(el.subStack, "quick");
+      return;
+    }
+
+    if (state.zone === "card") {
+      setFocusedTile(null);
+      movePlate(el.dockPlate, null);
+      movePlate(el.gridPlate, null);
+      el.npCard.classList.add("focus");
+      setStack(el.eyebrowStack, "music");
+      showTitle("music", [np ? np.title : "Now playing"], 0);
+      setStack(el.subStack, "music");
       return;
     }
 
@@ -665,6 +703,109 @@
     paintFocus();
   }
 
+  function fmtTime(ms) {
+    var total = Math.round((ms || 0) / 1000);
+    return Math.floor(total / 60) + ":" + ("0" + (total % 60)).slice(-2);
+  }
+
+  function renderMusicPanel() {
+    if (!np) return;
+    setText(el.muTitle, np.title || "");
+    setText(el.muArtist, np.artist || "");
+    var pct = np.duration_ms ? Math.max(0, Math.min(100, np.progress_ms / np.duration_ms * 100)) : 0;
+    el.muFill.style.width = pct + "%";
+    setText(el.muPos, fmtTime(np.progress_ms));
+    setText(el.muDur, fmtTime(np.duration_ms));
+    if (np.art) {
+      if (el.muArt.getAttribute("src") !== np.art) el.muArt.src = np.art;
+      el.muArt.classList.add("on");
+      el.muNote.style.display = "none";
+    } else {
+      el.muArt.classList.remove("on");
+      el.muNote.style.display = "flex";
+    }
+    if (state.lastPlaying !== np.playing) {
+      state.lastPlaying = np.playing;
+      if (el.muBtns[1]) el.muBtns[1].innerHTML = np.playing ? PAUSE_ICON : PLAY_ICON;
+    }
+  }
+
+  function renderNowPlaying() {
+    if (!np || !np.title) {
+      if (el.npCard) el.npCard.hidden = true;
+      return;
+    }
+    el.npCard.hidden = false;
+    setText(el.npTitle, np.title);
+    setText(el.npArtist, np.artist || "");
+    var pct = np.duration_ms ? Math.max(0, Math.min(100, np.progress_ms / np.duration_ms * 100)) : 0;
+    el.npFill.style.width = pct + "%";
+    if (np.art) {
+      if (el.npArt.getAttribute("src") !== np.art) el.npArt.src = np.art;
+      el.npArt.classList.add("on");
+      el.npNote.style.display = "none";
+    } else {
+      el.npArt.classList.remove("on");
+      el.npNote.style.display = "flex";
+    }
+    el.npState.innerHTML = np.playing ? PAUSE_ICON : PLAY_ICON;
+    if (state.musicOpen) renderMusicPanel();
+  }
+
+  function pollSpotify() {
+    clearTimeout(npTimer);
+    fetch(SPOTIFY_URL + "/nowplaying", { cache: "no-store" })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        np = data;
+        renderNowPlaying();
+        npTimer = setTimeout(pollSpotify, 6000);
+      })
+      .catch(function () {
+        if (el.npCard) el.npCard.hidden = true;
+        npTimer = setTimeout(pollSpotify, 15000);
+      });
+  }
+
+  function spotifyControl(action) {
+    fetch(SPOTIFY_URL + "/control", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: action })
+    }).then(function () {
+      setTimeout(pollSpotify, 350);
+    }).catch(function () {
+      toast("Spotify is not reachable");
+    });
+  }
+
+  function updateMusicFocus() {
+    for (var i = 0; i < el.muBtns.length; i++) {
+      el.muBtns[i].className = i === state.musicIndex ? "mu-btn focus" : "mu-btn";
+    }
+  }
+
+  function openMusic() {
+    state.musicOpen = true;
+    state.musicIndex = 1;
+    if (el.music) el.music.hidden = false;
+    renderNowPlaying();
+    renderMusicPanel();
+    updateMusicFocus();
+  }
+
+  function closeMusic() {
+    state.musicOpen = false;
+    if (el.music) el.music.hidden = true;
+    paintFocus();
+  }
+
+  function musicActivate() {
+    if (state.musicIndex === 0) spotifyControl("previous");
+    else if (state.musicIndex === 2) spotifyControl("next");
+    else spotifyControl("toggle");
+  }
+
   function switchSource(name) {
     if (!hasTizen()) { toast("Preview: switch to " + name); return; }
     try {
@@ -683,6 +824,7 @@
   }
 
   function activate() {
+    if (state.zone === "card") { openMusic(); return; }
     if (state.view === "grid") {
       var app = state.grid[state.gridIndex];
       if (app && app.id === "__toggle") {
@@ -703,6 +845,7 @@
       if (rail.key === "wifi") { launch({ id: NETWORK_SETTINGS, name: "Wi-Fi" }); return; }
       if (rail.key === "ambient") { launch({ id: "org.tizen.ambientapp", name: "Ambient" }); return; }
       if (rail.key === "livetv") { launch({ id: LIVETV_APP, name: "TV" }); return; }
+      if (rail.key === "music") { openMusic(); return; }
       if (rail.key.indexOf("hdmi") === 0) {
         switchSource("HDMI" + rail.key.slice(4));
         return;
@@ -716,6 +859,7 @@
       if (util.key === "all") { showGrid(false); return; }
       if (util.key === "edit") { showGrid(true); return; }
       if (util.key === "manage") { launch({ id: "org.volt.apps", name: "Apps" }); return; }
+      if (util.key === "music") { openMusic(); return; }
       if (util.key === "theme") { cycleTheme(); return; }
       launch({ id: SAMSUNG_HOME, name: "Samsung Home" });
       return;
@@ -789,10 +933,21 @@
       return;
     }
 
+    if (state.zone === "card") {
+      if (key === 38) { state.zone = "utils"; state.utilIndex = 0; }
+      if (key === 40) state.zone = "dock";
+      paintFocus();
+      return;
+    }
+
     if (state.zone === "utils") {
       if (key === 37) state.utilIndex = Math.max(0, state.utilIndex - 1);
       if (key === 39) state.utilIndex = Math.min(utils.length - 1, state.utilIndex + 1);
-      if (key === 40 || key === 38) state.zone = "dock";
+      if (key === 40) {
+        if (np && np.title) state.zone = "card";
+        else state.zone = "dock";
+      }
+      if (key === 38) state.zone = "utils";
       paintFocus();
       return;
     }
@@ -807,7 +962,10 @@
 
     if (key === 37) state.dockIndex = Math.max(0, state.dockIndex - 1);
     if (key === 39) state.dockIndex = Math.min(Math.max(0, state.dock.length - 1), state.dockIndex + 1);
-    if (key === 38) { state.zone = "utils"; state.utilIndex = 0; }
+    if (key === 38) {
+      if (np && np.title) state.zone = "card";
+      else { state.zone = "utils"; state.utilIndex = 0; }
+    }
     if (key === 40) { state.zone = "rail"; state.railIndex = 0; }
     paintFocus();
   }
@@ -840,12 +998,30 @@
 
   function onKeyDown(event) {
     var key = event.keyCode;
+
+    // Remote transport keys work while the launcher is on screen.
+    if (key === 10252 || key === 415 || key === 19 || key === 178) {
+      spotifyControl("toggle");
+      event.preventDefault();
+      return;
+    }
+    if (key === 10233 || key === 417) { spotifyControl("next"); event.preventDefault(); return; }
+    if (key === 10232 || key === 412) { spotifyControl("previous"); event.preventDefault(); return; }
+
     if (perf.keyMs === null) {
       var t0 = performance.now();
       requestAnimationFrame(function () {
         perf.keyMs = Math.round(performance.now() - t0);
         sendPerf();
       });
+    }
+
+    if (state.musicOpen) {
+      event.preventDefault();
+      if (key === 10009) { closeMusic(); return; }
+      if (key === 37) { state.musicIndex = Math.max(0, state.musicIndex - 1); updateMusicFocus(); return; }
+      if (key === 39) { state.musicIndex = Math.min(2, state.musicIndex + 1); updateMusicFocus(); return; }
+      return;
     }
 
     if (key === 13) {
@@ -881,6 +1057,7 @@
 
   function onKeyUp(event) {
     if (event.keyCode !== 13) return;
+    if (state.musicOpen) { musicActivate(); event.preventDefault(); return; }
     clearTimeout(state.holdTimer);
     if (state.suppressActivate) {
       state.suppressActivate = false;
@@ -1072,6 +1249,7 @@
       inputdevice: !!(window.tizen && window.tizen.tvinputdevice),
       userAgent: navigator.userAgent
     };
+    caps.media = { api: (window.tizen && typeof window.tizen.mediacontroller) || "none" };
     function send() {
       try {
         if (navigator.sendBeacon) {
@@ -1079,6 +1257,35 @@
         }
       } catch (e) { /* diagnostics only */ }
     }
+    if (window.tizen && window.tizen.mediacontroller) {
+      try {
+        caps.media.keys = Object.keys(window.tizen.mediacontroller);
+        window.tizen.mediacontroller.getActiveController(function (controller) {
+          caps.media.active = true;
+          caps.media.controllerKeys = Object.keys(controller || {});
+          if (controller && controller.getPlaybackInfo) {
+            controller.getPlaybackInfo(function (info) {
+              caps.media.info = info;
+              send();
+            }, function (err) {
+              caps.media.infoError = err && err.message;
+              send();
+            });
+          } else {
+            send();
+          }
+        }, function (err) {
+          caps.media.activeError = err && err.message;
+          send();
+        });
+      } catch (e) {
+        caps.media.error = e.message;
+        send();
+      }
+    } else {
+      send();
+    }
+
     if (window.tizen && window.tizen.systeminfo) {
       try {
         window.tizen.systeminfo.getPropertyValue("NETWORK", function (net) {
@@ -1339,23 +1546,37 @@
     fit();
     tick();
     setInterval(tick, 15000);
+    if (window.tizen && window.tizen.tvinputdevice) {
+      ["MediaPlayPause", "MediaPlay", "MediaPause", "MediaStop",
+       "MediaTrackPrevious", "MediaTrackNext", "MediaFastForward", "MediaRewind"
+      ].forEach(function (name) {
+        try { window.tizen.tvinputdevice.registerKey(name); } catch (e) {}
+      });
+    }
     if (DIAGNOSTICS) reportCaps();
     renderRail();
     readNetwork();
-    if (DIAGNOSTICS) {
-      probeSystem();
-      perf.benchMode = "utils";
+    if (DIAGNOSTICS) probeSystem();
+    var bench = /[?&]bench=([a-z]+)/.exec(location.search);
+    if (bench) {
+      perf.benchMode = bench[1];
       setTimeout(benchFocus, 4000);
     }
     loadApps();
+    try { SPOTIFY_URL = localStorage.getItem("spotifyUrl") || SPOTIFY_URL; } catch (e) {}
+    setTimeout(pollSpotify, 1500);
+    if (/[?&]music=1/.test(location.search)) {
+      setTimeout(function () { openMusic(); }, 1800);
+    }
     var zone = /[?&]zone=([a-z]+)/.exec(location.search);
     if (zone) {
       setTimeout(function () {
-        state.zone = zone[1] === "rail" ? "rail" : "utils";
+        state.zone = zone[1] === "card" ? "card"
+          : (zone[1] === "rail" ? "rail" : "utils");
         state.utilIndex = 0;
         state.railIndex = 0;
         paintFocus();
-      }, 400);
+      }, 2600);
     }
   });
 
