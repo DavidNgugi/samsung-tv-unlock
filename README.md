@@ -4,6 +4,20 @@ Turning a Samsung Tizen TV into a platform you own: your launcher, your apps,
 pushed from this machine, controlled from your network. No store submission, no
 review queue.
 
+## Quick start
+
+~~~bash
+git clone https://github.com/DavidNgugi/samsung-tv-unlock.git cleanmysamsungtv && cd cleanmysamsungtv
+tools/setup.sh
+~~~
+
+It asks for the TV IP, shows your certificate profiles, optionally takes a Spotify
+bridge URL, writes `apps/Launcher/config.js`, builds and installs. Spotify is
+optional — without a bridge the widget stays hidden.
+
+You still need Tizen Studio CLI and a Samsung certificate for your TV's DUID.
+Full walkthrough: [docs/SETUP.md](docs/SETUP.md).
+
 > **The guide:** [CLEANMYSAMSUNGTV.md](CLEANMYSAMSUNGTV.md) is the single
 > document for this project — every verified step, the launcher architecture,
 > the Home-button reality, and the safety/backup/restore model. This README is

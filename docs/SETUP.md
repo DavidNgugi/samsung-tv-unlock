@@ -17,9 +17,25 @@ DUID authorised through Samsung's certificate flow.
 
 ## 2. Build and install the launcher
 
+The fast path does connection, config, build and install in one go:
+
 ~~~bash
-git clone <repo> cleanmysamsungtv
+git clone https://github.com/DavidNgugi/samsung-tv-unlock.git cleanmysamsungtv
 cd cleanmysamsungtv
+tools/setup.sh
+~~~
+
+It asks for the TV IP, lists certificate profiles, and optionally takes a bridge
+URL. Non-interactive:
+
+~~~bash
+tools/setup.sh --tv 192.168.1.20 --profile my-cert --bridge http://192.168.1.50:8795
+tools/setup.sh --tv 192.168.1.20 --profile my-cert --no-spotify
+~~~
+
+Manual equivalent:
+
+~~~bash
 sdb connect <TV_IP>:26101
 PROFILE=<their-cert-profile> tools/deploy-launcher.sh
 ~~~
