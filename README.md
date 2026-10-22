@@ -87,20 +87,35 @@ version table). The app install in Part 1 is identical.
 
 ---
 
-## Part 5 — Back up and restore
+## Part 5 — Back up
 
 ~~~bash
 tools/backup-tv.sh
 ~~~
 
 Writes model/DUID, the app list, source, certificate, and a `RESTORE.md` to
-`~/Backups/cleanmysamsungtv/<date>/`.
+`~/Backups/cleanmysamsungtv/<date>/`. Run it **before** changing anything.
 
-To undo everything:
+---
 
-- Remove the app: `tizen uninstall -p tvunlock02.Launcher`
-- Revert the Home key: restore `app-context.db` (see docs/HOME-BUTTON.md) and
-  power-cycle.
+## Part 6 — Undo everything (one step)
+
+~~~bash
+tools/revert.sh <TV-IP>
+~~~
+
+That single command:
+
+- restores the stock `/opt/dbspace/.app-context.db` (Home button → Samsung Home)
+- sets `db/appfw/home_appid`, `db/appfw/booting_appid_backup` and
+  `db/first_screen/type` back to their stock values (TV viewer / Smart Hub)
+- uninstalls Clean Home
+
+Then **power-cycle** the TV (unplug 10 s). Flags: `--skip-uninstall` keeps the
+app, `--stock-db PATH` if your stock DB isn't in `~/Backups`.
+
+If the stock DB can't be found, the script says so and leaves the Home key
+alone — restore it from your backup with `docs/HOME-BUTTON.md`.
 
 ---
 
