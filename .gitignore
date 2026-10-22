@@ -8,3 +8,6 @@ __pycache__/
 .manifest.tmp
 author-signature.xml
 signature1.xml
+apps/Launcher/config.js
+apps/Launcher/wallpapers/*.mp4
+apps/Launcher/wallpapers/*.jpg

@@ -79,6 +79,8 @@
     focusedTile: null,
     musicOpen: false,
     musicIndex: 1,
+    wallOpen: false,
+    wallIndex: 1,
     reordering: false,
     reorderOriginal: null,
     holdTimer: null,
@@ -99,6 +101,8 @@
 
   var el = {
     stage: document.getElementById("stage"),
+    wallpaper: document.getElementById("wallpaper"),
+    wallpaperDim: document.getElementById("wallpaper-dim"),
     time: document.getElementById("time"),
     date: document.getElementById("date"),
     utils: document.getElementById("utils"),
@@ -115,6 +119,8 @@
     empty: document.getElementById("empty"),
     emptyText: document.getElementById("empty-text"),
     toast: document.getElementById("toast"),
+    wallpicker: document.getElementById("wallpicker"),
+    wallgrid: document.getElementById("wallgrid"),
     glow: document.getElementById("glow"),
     greeting: document.getElementById("greeting"),
     npCard: document.getElementById("np-card"),
@@ -137,10 +143,119 @@
 
   var SPOTIFY_URL = (window.TV_CONFIG && window.TV_CONFIG.spotifyUrl) ||
     "http://192.168.100.24:8795";
+  var SPOTIFY_CLIENT_ID = (window.TV_CONFIG && window.TV_CONFIG.spotifyClientId) || "";
+  var SPOTIFY_REFRESH = (window.TV_CONFIG && window.TV_CONFIG.spotifyRefreshToken) || "";
+  var spotifyAccess = null;
   var PLAY_ICON = '<svg viewBox="0 0 24 24" width="30" height="30" fill="#f3f5f8"><path d="M8 5l11 7-11 7z"/></svg>';
   var PAUSE_ICON = '<svg viewBox="0 0 24 24" width="30" height="30" fill="#f3f5f8"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
   var np = null;
   var npTimer = null;
+
+  // ---- live wallpaper (test) ----
+  var WALLPAPERS = [
+    { id: "off", name: "Off" },
+    { id: "batman", name: "Batman", file: "wallpapers/batman.mp4", thumb: "wallpapers/batman.jpg" },
+    { id: "batman-mono", name: "Batman Mono", file: "wallpapers/batman-mono.mp4", thumb: "wallpapers/batman-mono.jpg" },
+    { id: "pixel-rain", name: "Pixel Rain", file: "wallpapers/pixel-rain.mp4", thumb: "wallpapers/pixel-rain.jpg" }
+  ];
+  var wallpaperIndex = 0;
+  function setWallpaper(i) {
+    wallpaperIndex = (i + WALLPAPERS.length) % WALLPAPERS.length;
+    var wp = WALLPAPERS[wallpaperIndex];
+    if (wp.file) {
+      el.wallpaper.src = wp.file;
+      el.wallpaper.classList.add("on");
+      el.wallpaperDim.classList.add("on");
+      var p = el.wallpaper.play();
+      if (p && p.catch) p.catch(function () {});
+    } else {
+      el.wallpaper.classList.remove("on");
+      el.wallpaperDim.classList.remove("on");
+      el.wallpaper.pause();
+      el.wallpaper.removeAttribute("src");
+      el.wallpaper.load();
+    }
+    try { localStorage.setItem("tv-wallpaper", wp.id); } catch (e) {}
+    toast("Wallpaper: " + wp.name);
+  }
+  function cycleWallpaper(dir) { setWallpaper(wallpaperIndex + (dir || 1)); }
+  function applySavedWallpaper() {
+    var id = "";
+    try { id = localStorage.getItem("tv-wallpaper") || ""; } catch (e) {}
+    if (!id) return false;
+    for (var i = 0; i < WALLPAPERS.length; i++) {
+      if (WALLPAPERS[i].id === id) { setWallpaper(i); return true; }
+    }
+    return false;
+  }
+  function loadWallpaperCatalog() {
+    var settled = false;
+    function settle() { if (settled) return; settled = true; if (!applySavedWallpaper()) setWallpaper(0); }
+    fetch("wallpapers.json", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (list) {
+      if (!Array.isArray(list) || !list.length) { settle(); return; }
+      var off = WALLPAPERS.filter(function (w) { return !w.file; });
+      var known = {}; WALLPAPERS.forEach(function (w) { known[w.id] = true; });
+      var extra = list.filter(function (w) { return w && w.file && !known[w.id]; })
+        .map(function (w) { return { id: w.id, name: w.name || w.id, file: w.file, thumb: w.thumb, category: w.category }; });
+      if (extra.length) WALLPAPERS = off.concat(WALLPAPERS.filter(function (w) { return w.file; }), extra);
+      if (state.wallOpen) renderWallPicker();
+      settle();
+    }).catch(settle);
+  }
+  function wallpaperFocus() {
+    var nodes = el.wallgrid.querySelectorAll(".wp-tile");
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].className = nodes[i].className.replace(/\s*focus/g, "") + (i === state.wallIndex ? " focus" : "");
+    }
+    var node = nodes[state.wallIndex];
+    if (node) {
+      var top = node.offsetTop, bottom = top + node.offsetHeight;
+      if (top < el.wallgrid.scrollTop) el.wallgrid.scrollTop = top;
+      else if (bottom > el.wallgrid.scrollTop + el.wallgrid.clientHeight)
+        el.wallgrid.scrollTop = bottom - el.wallgrid.clientHeight;
+    }
+  }
+  function renderWallPicker() {
+    el.wallgrid.innerHTML = "";
+    WALLPAPERS.forEach(function (wp, i) {
+      var t = document.createElement("div");
+      t.className = "wp-tile" + (i === wallpaperIndex ? " sel" : "") + (wp.file ? "" : " off");
+      if (wp.thumb) {
+        var img = document.createElement("img");
+        img.alt = "";
+        img.src = wp.thumb;
+        t.appendChild(img);
+      } else if (!wp.file) {
+        t.textContent = "Off";
+      }
+      var nm = document.createElement("div");
+      nm.className = "wp-name";
+      nm.textContent = wp.name;
+      t.appendChild(nm);
+      el.wallgrid.appendChild(t);
+    });
+    wallpaperFocus();
+  }
+  function openWallPicker() {
+    state.wallOpen = true;
+    state.wallIndex = wallpaperIndex;
+    el.wallpicker.hidden = false;
+    requestAnimationFrame(function () { el.wallpicker.classList.add("open"); });
+    renderWallPicker();
+  }
+  function closeWallPicker() {
+    state.wallOpen = false;
+    el.wallpicker.classList.remove("open");
+    setTimeout(function () { if (!state.wallOpen) el.wallpicker.hidden = true; }, 340);
+  }
+  function wallMove(d) {
+    state.wallIndex = Math.max(0, Math.min(WALLPAPERS.length - 1, state.wallIndex + d));
+    wallpaperFocus();
+  }
+  function wallActivate() {
+    setWallpaper(state.wallIndex);
+    closeWallPicker();
+  }
 
   var utils = [
     { key: "all", label: "All apps" },
@@ -149,6 +264,7 @@
     { key: "store", label: "App Store" },
     { key: "music", label: "Music" },
     { key: "theme", label: "Theme" },
+    { key: "wall", label: "Wallpaper" },
     { key: "home", label: "Samsung Home" }
   ];
 
@@ -772,7 +888,14 @@
 
   function renderNowPlaying() {
     if (!np || !np.title) {
-      if (el.npCard) el.npCard.hidden = true;
+      el.npCard.hidden = false;
+      setText(el.npTitle, "Nothing playing");
+      setText(el.npArtist, "Press OK to play on TV");
+      el.npFill.style.width = "0%";
+      if (el.npArt.getAttribute("src") !== "icons/cd.svg") el.npArt.src = "icons/cd.svg";
+      el.npArt.classList.add("on");
+      el.npNote.style.display = "none";
+      el.npState.innerHTML = PLAY_ICON;
       return;
     }
     el.npCard.hidden = false;
@@ -792,27 +915,107 @@
     if (state.musicOpen) renderMusicPanel();
   }
 
+  function spotifyRefreshToken() {
+    if (spotifyAccess && Date.now() < spotifyAccess.expiresAt - 30000) return Promise.resolve();
+    if (!SPOTIFY_CLIENT_ID || !SPOTIFY_REFRESH) return Promise.reject(new Error("no token"));
+    var body = new URLSearchParams();
+    body.append("grant_type", "refresh_token");
+    body.append("refresh_token", SPOTIFY_REFRESH);
+    body.append("client_id", SPOTIFY_CLIENT_ID);
+    return fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString()
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.access_token) throw new Error("refresh failed");
+      spotifyAccess = { token: j.access_token, expiresAt: Date.now() + (j.expires_in || 3600) * 1000 };
+    });
+  }
+
+  function spotifyApi(path, method, query, body) {
+    return spotifyRefreshToken().then(function () {
+      var opts = { method: method || "GET",
+        headers: { "Authorization": "Bearer " + spotifyAccess.token, "Content-Type": "application/json" },
+        cache: "no-store" };
+      if (body !== undefined) opts.body = JSON.stringify(body);
+      return fetch("https://api.spotify.com/v1" + path + (query ? "?" + query : ""), opts);
+    });
+  }
+
+  function spotifyPlayOnTV(retry) {
+    retry = retry || 0;
+    spotifyApi("/me/player/devices").then(function (res) { return res.json(); }).then(function (data) {
+      var devices = (data && data.devices) || [];
+      var tv = null;
+      for (var i = 0; i < devices.length; i++) {
+        var n = (devices[i].name || "").toLowerCase();
+        if (n.indexOf("tv") >= 0 || n.indexOf("samsung") >= 0 || n.indexOf("au8000") >= 0) { tv = devices[i]; break; }
+      }
+      if (!tv && devices.length) tv = devices[devices.length - 1];
+      if (!tv) {
+        if (retry < 2) {
+          try { window.tizen.application.launch("rJeHak5zRg.Spotify", function () {}, function () {}); } catch (e) {}
+          setTimeout(function () { spotifyPlayOnTV(retry + 1); }, 4000);
+        } else {
+          toast("Open Spotify on the TV once, then try again");
+        }
+        return;
+      }
+      spotifyApi("/me/player", "PUT", null, { device_ids: [tv.id], play: true }).then(function () {
+        toast("Playing on " + tv.name);
+        // Keep the music, but come straight back to Clean Home so the app
+        // only flashes instead of staying on screen.
+        setTimeout(function () {
+          try { window.tizen.application.launch("tvunlock02.Launcher", function () {}, function () {}); } catch (e) {}
+        }, 1200);
+        setTimeout(pollSpotify, 1600);
+      }).catch(function () { toast("Could not start playback"); });
+    }).catch(function () { toast("Spotify is not reachable"); });
+  }
+
   function pollSpotify() {
     clearTimeout(npTimer);
-    fetch(SPOTIFY_URL + "/nowplaying", { cache: "no-store" })
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        np = data;
-        renderNowPlaying();
-        npTimer = setTimeout(pollSpotify, 6000);
-      })
-      .catch(function () {
-        if (el.npCard) el.npCard.hidden = true;
-        npTimer = setTimeout(pollSpotify, 15000);
-      });
+    if (!SPOTIFY_CLIENT_ID || !SPOTIFY_REFRESH) {
+      if (el.npCard) el.npCard.hidden = true;
+      npTimer = setTimeout(pollSpotify, 30000);
+      return;
+    }
+    spotifyApi("/me/player/currently-playing").then(function (res) {
+      if (res.status === 204) return { playing: false };
+      return res.json();
+    }).then(function (data) {
+      if (!data || !data.item) {
+        np = { playing: false };
+      } else {
+        var item = data.item;
+        var images = (item.album && item.album.images) || [];
+        np = {
+          playing: !!data.is_playing,
+          title: item.name || "",
+          artist: (item.artists || []).map(function (a) { return a.name; }).join(", "),
+          art: images.length ? images[0].url : "",
+          progress_ms: data.progress_ms || 0,
+          duration_ms: item.duration_ms || 0
+        };
+      }
+      renderNowPlaying();
+      npTimer = setTimeout(pollSpotify, 6000);
+    }).catch(function () {
+      if (el.npCard) el.npCard.hidden = true;
+      npTimer = setTimeout(pollSpotify, 15000);
+    });
   }
 
   function spotifyControl(action) {
-    fetch(SPOTIFY_URL + "/control", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: action })
-    }).then(function () {
+    if (!SPOTIFY_CLIENT_ID || !SPOTIFY_REFRESH) { toast("Spotify is not set up"); return; }
+    if (action === "toggle") action = (np && np.playing) ? "pause" : "play";
+    var path, method;
+    if (action === "play") { path = "/me/player/play"; method = "PUT"; }
+    else if (action === "pause") { path = "/me/player/pause"; method = "PUT"; }
+    else if (action === "next") { path = "/me/player/next"; method = "POST"; }
+    else if (action === "previous") { path = "/me/player/previous"; method = "POST"; }
+    else return;
+    spotifyApi(path, method).then(function () {
       setTimeout(pollSpotify, 350);
     }).catch(function () {
       toast("Spotify is not reachable");
@@ -843,7 +1046,8 @@
   function musicActivate() {
     if (state.musicIndex === 0) spotifyControl("previous");
     else if (state.musicIndex === 2) spotifyControl("next");
-    else spotifyControl("toggle");
+    else if (np && np.playing) spotifyControl("pause");
+    else spotifyPlayOnTV();
   }
 
   function switchSource(name) {
@@ -894,6 +1098,7 @@
       if (util.key === "store") { launchStore(); return; }
       if (util.key === "music") { openMusic(); return; }
       if (util.key === "theme") { cycleTheme(); return; }
+      if (util.key === "wall") { openWallPicker(); return; }
       launch({ id: SAMSUNG_HOME, name: "Samsung Home" });
       return;
     }
@@ -1032,9 +1237,19 @@
   function onKeyDown(event) {
     var key = event.keyCode;
 
+    if (state.wallOpen) {
+      if (key === 37) { wallMove(-1); event.preventDefault(); return; }
+      if (key === 39) { wallMove(1); event.preventDefault(); return; }
+      if (key === 38) { wallMove(-6); event.preventDefault(); return; }
+      if (key === 40) { wallMove(6); event.preventDefault(); return; }
+      if (key === 13) { wallActivate(); event.preventDefault(); return; }
+      if (key === 10009 || key === 27) { closeWallPicker(); event.preventDefault(); return; }
+      event.preventDefault(); return;
+    }
+
     // Remote transport keys work while the launcher is on screen.
     if (key === 10252 || key === 415 || key === 19 || key === 178) {
-      spotifyControl("toggle");
+      if (np && np.playing) spotifyControl("pause"); else spotifyPlayOnTV();
       event.preventDefault();
       return;
     }
@@ -1595,6 +1810,7 @@
       setTimeout(benchFocus, 4000);
     }
     loadApps();
+    loadWallpaperCatalog();
     try { SPOTIFY_URL = localStorage.getItem("spotifyUrl") || SPOTIFY_URL; } catch (e) {}
     setTimeout(pollSpotify, 1500);
     try {
@@ -1612,6 +1828,10 @@
       if (document.visibilityState !== "visible") return;
       var c = readAppsCache();
       if (c && Date.now() - c.t > CACHE_MAX_AGE) setTimeout(fetchApps, 1500);
+      pollSpotify();
+      if (el.wallpaper && el.wallpaper.classList.contains("on")) {
+        el.wallpaper.play().catch(function () {});
+      }
     });
     if (/[?&]music=1/.test(location.search)) {
       setTimeout(function () { openMusic(); }, 1800);
@@ -1630,5 +1850,10 @@
 
   window.addEventListener("resize", fit);
   document.addEventListener("keydown", onKeyDown);
+  document.addEventListener("keydown", function (e) {
+    if (e.keyCode === 403) { cycleWallpaper(1); e.preventDefault(); }
+    else if (e.keyCode === 404) { cycleWallpaper(-1); e.preventDefault(); }
+    else if (e.keyCode === 87) { cycleWallpaper(1); }
+  });
   document.addEventListener("keyup", onKeyUp);
 })();

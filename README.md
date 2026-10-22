@@ -3,6 +3,8 @@
 Sideload a quiet launcher on any Samsung Tizen TV, then make the **Home button**
 open it — no root, no store, and every step is reversible.
 
+![Clean Home running on a Samsung AU8000](docs/hero.jpg)
+
 - Clean, Apple-TV-style launcher: dock, All apps, sources, clock
 - Physical **Home button → Clean Home** (works on Tizen 6, no root)
 - **Instant** switching (the launcher stays resident)

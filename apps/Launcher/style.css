@@ -321,16 +321,18 @@ html, body {
   gap: 28px;
   padding: 14px 24px;
   border-radius: 22px;
-  background: linear-gradient(150deg, rgba(30,38,50,0.94), rgba(12,16,22,0.94));
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  background: linear-gradient(150deg, rgba(18,22,30,0.42), rgba(8,10,16,0.34));
+  -webkit-backdrop-filter: blur(26px) saturate(1.5);
+  backdrop-filter: blur(26px) saturate(1.5);
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.22);
   z-index: 3;
 }
 .np-card[hidden] { display: none; }
 .np-card.focus {
   border-color: rgba(255,255,255,0.92);
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.78), 0 24px 55px rgba(0,0,0,0.6);
-  background: linear-gradient(150deg, rgba(46,58,74,0.98), rgba(16,22,30,0.98));
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.78), 0 24px 55px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+  background: linear-gradient(150deg, rgba(40,48,62,0.5), rgba(14,18,26,0.42));
   transform: scale(1.03);
 }
 .np-art-wrap {
@@ -474,3 +476,35 @@ html, body {
 
 .rail-ico { width: 26px; height: 26px; margin-right: 10px; flex: none; }
 .rail-ico.off { opacity: 0.4; }
+
+/* ---- live wallpaper ---- */
+#wallpaper { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; object-fit: cover; z-index: 1; opacity: 0; transition: opacity 500ms linear; pointer-events: none; background: #000; }
+#wallpaper.on { opacity: 1; }
+#wallpaper-dim { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 2; opacity: 0; transition: opacity 500ms linear; pointer-events: none; background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.05) 42%, rgba(0,0,0,0.62) 100%); }
+#wallpaper-dim.on { opacity: 1; }
+#stage > .glow, #stage > .clock, #stage > .utils, #stage > .shelf, #stage > .dock, #stage > .rail, #stage > .grid, #stage > .np-card, #stage > .music, #stage > .empty, #stage > .toast { z-index: 3; }
+
+/* ---- wallpaper bottom sheet ---- */
+.wallpicker {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 640px;
+  background: linear-gradient(180deg, rgba(14,18,26,0.97), rgba(6,8,12,0.99));
+  border-top: 1px solid rgba(255,255,255,0.12);
+  border-radius: 36px 36px 0 0;
+  padding: 36px 72px 52px;
+  transform: translateY(110%);
+  transition: transform 320ms cubic-bezier(.2,.8,.2,1);
+  z-index: 4; display: flex; flex-direction: column;
+}
+.wallpicker.open { transform: translateY(0); }
+.wallpicker[hidden] { display: none; }
+.wp-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 26px; }
+.wp-title { font-size: 34px; font-weight: 500; letter-spacing: 0.02em; }
+.wp-hint { font-size: 20px; color: rgba(243,245,248,0.6); }
+.wp-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 22px; overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+.wp-tile { position: relative; border-radius: 18px; overflow: hidden; height: 156px; background: rgba(255,255,255,0.06); border: 2px solid transparent; transition: transform 160ms; }
+.wp-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wp-tile .wp-name { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 14px; font-size: 18px; background: linear-gradient(to top, rgba(0,0,0,0.82), transparent); }
+.wp-tile.focus { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,0.7); transform: scale(1.03); }
+.wp-tile.sel::after { content: "✓"; position: absolute; top: 8px; right: 12px; font-size: 22px; }
+.wp-tile.off { display: flex; align-items: center; justify-content: center; font-size: 20px; color: rgba(243,245,248,0.7); background: rgba(255,255,255,0.04); }
+#stage > .wallpicker { z-index: 4; }

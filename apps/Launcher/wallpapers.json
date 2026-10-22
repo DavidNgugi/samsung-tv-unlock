@@ -1,0 +1,296 @@
+[
+ {
+  "id": "patrick-bateman-neon-shadow",
+  "name": "Patrick Bateman Neon Shadow",
+  "category": "abstract",
+  "file": "wallpapers/patrick-bateman-neon-shadow.mp4",
+  "thumb": "wallpapers/patrick-bateman-neon-shadow.jpg"
+ },
+ {
+  "id": "crimson-bonsai-minimalist",
+  "name": "Crimson Bonsai Minimalist",
+  "category": "abstract",
+  "file": "wallpapers/crimson-bonsai-minimalist.mp4",
+  "thumb": "wallpapers/crimson-bonsai-minimalist.jpg"
+ },
+ {
+  "id": "deep-sea-glow",
+  "name": "Deep Sea Glow",
+  "category": "abstract",
+  "file": "wallpapers/deep-sea-glow.mp4",
+  "thumb": "wallpapers/deep-sea-glow.jpg"
+ },
+ {
+  "id": "flat-vector-black-hole",
+  "name": "Flat Vector Black Hole",
+  "category": "abstract",
+  "file": "wallpapers/flat-vector-black-hole.mp4",
+  "thumb": "wallpapers/flat-vector-black-hole.jpg"
+ },
+ {
+  "id": "minimal-night-moon-blue-sky",
+  "name": "Minimal Night Moon Blue Sky",
+  "category": "abstract",
+  "file": "wallpapers/minimal-night-moon-blue-sky.mp4",
+  "thumb": "wallpapers/minimal-night-moon-blue-sky.jpg"
+ },
+ {
+  "id": "hypnotic-eyes-monochrome",
+  "name": "Hypnotic Eyes Monochrome",
+  "category": "abstract",
+  "file": "wallpapers/hypnotic-eyes-monochrome.mp4",
+  "thumb": "wallpapers/hypnotic-eyes-monochrome.jpg"
+ },
+ {
+  "id": "the-crown-of-thorns",
+  "name": "The Crown Of Thorns",
+  "category": "abstract",
+  "file": "wallpapers/the-crown-of-thorns.mp4",
+  "thumb": "wallpapers/the-crown-of-thorns.jpg"
+ },
+ {
+  "id": "miles-morales-neon-purple-city-spider-man-into-the-spider-verse",
+  "name": "Miles Morales Neon Purple City Spider Man Into The Spider Verse",
+  "category": "movies",
+  "file": "wallpapers/miles-morales-neon-purple-city-spider-man-into-the-spider-verse.mp4",
+  "thumb": "wallpapers/miles-morales-neon-purple-city-spider-man-into-the-spider-verse.jpg"
+ },
+ {
+  "id": "rick-x-morty-and-the-delorean-retrowave",
+  "name": "Rick X Morty And The Delorean Retrowave",
+  "category": "movies",
+  "file": "wallpapers/rick-x-morty-and-the-delorean-retrowave.mp4",
+  "thumb": "wallpapers/rick-x-morty-and-the-delorean-retrowave.jpg"
+ },
+ {
+  "id": "rick-and-morty-stargazing",
+  "name": "Rick And Morty Stargazing",
+  "category": "movies",
+  "file": "wallpapers/rick-and-morty-stargazing.mp4",
+  "thumb": "wallpapers/rick-and-morty-stargazing.jpg"
+ },
+ {
+  "id": "upside-down-horizon-miles-morales-spider-man",
+  "name": "Upside Down Horizon Miles Morales Spider Man",
+  "category": "movies",
+  "file": "wallpapers/upside-down-horizon-miles-morales-spider-man.mp4",
+  "thumb": "wallpapers/upside-down-horizon-miles-morales-spider-man.jpg"
+ },
+ {
+  "id": "batman-haha-joker",
+  "name": "Batman Haha Joker",
+  "category": "movies",
+  "file": "wallpapers/batman-haha-joker.mp4",
+  "thumb": "wallpapers/batman-haha-joker.jpg"
+ },
+ {
+  "id": "rick-and-morty-green-portal",
+  "name": "Rick And Morty Green Portal",
+  "category": "movies",
+  "file": "wallpapers/rick-and-morty-green-portal.mp4",
+  "thumb": "wallpapers/rick-and-morty-green-portal.jpg"
+ },
+ {
+  "id": "rainy-night-city-cyberpunk-edgerunners",
+  "name": "Rainy Night City Cyberpunk Edgerunners",
+  "category": "movies",
+  "file": "wallpapers/rainy-night-city-cyberpunk-edgerunners.mp4",
+  "thumb": "wallpapers/rainy-night-city-cyberpunk-edgerunners.jpg"
+ },
+ {
+  "id": "zen-palace-japanese-red-maple",
+  "name": "Zen Palace Japanese Red Maple",
+  "category": "landscape",
+  "file": "wallpapers/zen-palace-japanese-red-maple.mp4",
+  "thumb": "wallpapers/zen-palace-japanese-red-maple.jpg"
+ },
+ {
+  "id": "summer-flower-green-field",
+  "name": "Summer Flower Green Field",
+  "category": "landscape",
+  "file": "wallpapers/summer-flower-green-field.mp4",
+  "thumb": "wallpapers/summer-flower-green-field.jpg"
+ },
+ {
+  "id": "lonely-vending-machine",
+  "name": "Lonely Vending Machine",
+  "category": "landscape",
+  "file": "wallpapers/lonely-vending-machine.mp4",
+  "thumb": "wallpapers/lonely-vending-machine.jpg"
+ },
+ {
+  "id": "lone-tree-meadow",
+  "name": "Lone Tree Meadow",
+  "category": "landscape",
+  "file": "wallpapers/lone-tree-meadow.mp4",
+  "thumb": "wallpapers/lone-tree-meadow.jpg"
+ },
+ {
+  "id": "kanagawa-great-wave",
+  "name": "Kanagawa Great Wave",
+  "category": "landscape",
+  "file": "wallpapers/kanagawa-great-wave.mp4",
+  "thumb": "wallpapers/kanagawa-great-wave.jpg"
+ },
+ {
+  "id": "bliss-windows-xp-minecraft",
+  "name": "Bliss Windows Xp Minecraft",
+  "category": "landscape",
+  "file": "wallpapers/bliss-windows-xp-minecraft.mp4",
+  "thumb": "wallpapers/bliss-windows-xp-minecraft.jpg"
+ },
+ {
+  "id": "torii-gloomy-forest",
+  "name": "Torii Gloomy Forest",
+  "category": "landscape",
+  "file": "wallpapers/torii-gloomy-forest.mp4",
+  "thumb": "wallpapers/torii-gloomy-forest.jpg"
+ },
+ {
+  "id": "black-hole-monochrome",
+  "name": "Black Hole Monochrome",
+  "category": "sci-fi",
+  "file": "wallpapers/black-hole-monochrome.mp4",
+  "thumb": "wallpapers/black-hole-monochrome.jpg"
+ },
+ {
+  "id": "night-city-street-cyberpunk-2077",
+  "name": "Night City Street Cyberpunk 2077",
+  "category": "sci-fi",
+  "file": "wallpapers/night-city-street-cyberpunk-2077.mp4",
+  "thumb": "wallpapers/night-city-street-cyberpunk-2077.jpg"
+ },
+ {
+  "id": "space-traveler-gazing-at-the-blue-planet",
+  "name": "Space Traveler Gazing At The Blue Planet",
+  "category": "sci-fi",
+  "file": "wallpapers/space-traveler-gazing-at-the-blue-planet.mp4",
+  "thumb": "wallpapers/space-traveler-gazing-at-the-blue-planet.jpg"
+ },
+ {
+  "id": "saturn-monochrome",
+  "name": "Saturn Monochrome",
+  "category": "sci-fi",
+  "file": "wallpapers/saturn-monochrome.mp4",
+  "thumb": "wallpapers/saturn-monochrome.jpg"
+ },
+ {
+  "id": "singularity-cosmic-vortex",
+  "name": "Singularity Cosmic Vortex",
+  "category": "sci-fi",
+  "file": "wallpapers/singularity-cosmic-vortex.mp4",
+  "thumb": "wallpapers/singularity-cosmic-vortex.jpg"
+ },
+ {
+  "id": "giant-black-hole-gargantua",
+  "name": "Giant Black Hole Gargantua",
+  "category": "sci-fi",
+  "file": "wallpapers/giant-black-hole-gargantua.mp4",
+  "thumb": "wallpapers/giant-black-hole-gargantua.jpg"
+ },
+ {
+  "id": "ufo-country-night",
+  "name": "Ufo Country Night",
+  "category": "sci-fi",
+  "file": "wallpapers/ufo-country-night.mp4",
+  "thumb": "wallpapers/ufo-country-night.jpg"
+ },
+ {
+  "id": "lamborghini",
+  "name": "Lamborghini",
+  "category": "vehicle",
+  "file": "wallpapers/lamborghini.mp4",
+  "thumb": "wallpapers/lamborghini.jpg"
+ },
+ {
+  "id": "honda-civic-type-r-blossom-street-forza-horizon",
+  "name": "Honda Civic Type R Blossom Street Forza Horizon",
+  "category": "vehicle",
+  "file": "wallpapers/honda-civic-type-r-blossom-street-forza-horizon.mp4",
+  "thumb": "wallpapers/honda-civic-type-r-blossom-street-forza-horizon.jpg"
+ },
+ {
+  "id": "nissan-gtr-r35-x-mclaren-720s-spider",
+  "name": "Nissan Gtr R35 X Mclaren 720s Spider",
+  "category": "vehicle",
+  "file": "wallpapers/nissan-gtr-r35-x-mclaren-720s-spider.mp4",
+  "thumb": "wallpapers/nissan-gtr-r35-x-mclaren-720s-spider.jpg"
+ },
+ {
+  "id": "nissan-gtr-r33-cherry-blossoms-forza-horizon-6",
+  "name": "Nissan Gtr R33 Cherry Blossoms Forza Horizon 6",
+  "category": "vehicle",
+  "file": "wallpapers/nissan-gtr-r33-cherry-blossoms-forza-horizon-6.mp4",
+  "thumb": "wallpapers/nissan-gtr-r33-cherry-blossoms-forza-horizon-6.jpg"
+ },
+ {
+  "id": "purple-nissan-silvia-s13-jdm",
+  "name": "Purple Nissan Silvia S13 Jdm",
+  "category": "vehicle",
+  "file": "wallpapers/purple-nissan-silvia-s13-jdm.mp4",
+  "thumb": "wallpapers/purple-nissan-silvia-s13-jdm.jpg"
+ },
+ {
+  "id": "shenyang-j-1-feisha",
+  "name": "Shenyang J 1 Feisha",
+  "category": "vehicle",
+  "file": "wallpapers/shenyang-j-1-feisha.mp4",
+  "thumb": "wallpapers/shenyang-j-1-feisha.jpg"
+ },
+ {
+  "id": "toyota-mark-ii-jzx100",
+  "name": "Toyota Mark Ii Jzx100",
+  "category": "vehicle",
+  "file": "wallpapers/toyota-mark-ii-jzx100.mp4",
+  "thumb": "wallpapers/toyota-mark-ii-jzx100.jpg"
+ },
+ {
+  "id": "blue-bmw-m3-g80",
+  "name": "Blue Bmw M3 G80",
+  "category": "vehicle",
+  "file": "wallpapers/blue-bmw-m3-g80.mp4",
+  "thumb": "wallpapers/blue-bmw-m3-g80.jpg"
+ },
+ {
+  "id": "ducati-1199-panigale",
+  "name": "Ducati 1199 Panigale",
+  "category": "vehicle",
+  "file": "wallpapers/ducati-1199-panigale.mp4",
+  "thumb": "wallpapers/ducati-1199-panigale.jpg"
+ },
+ {
+  "id": "formula-1-ferrari-car",
+  "name": "Formula 1 Ferrari Car",
+  "category": "vehicle",
+  "file": "wallpapers/formula-1-ferrari-car.mp4",
+  "thumb": "wallpapers/formula-1-ferrari-car.jpg"
+ },
+ {
+  "id": "formula-1-red-bull-car",
+  "name": "Formula 1 Red Bull Car",
+  "category": "vehicle",
+  "file": "wallpapers/formula-1-red-bull-car.mp4",
+  "thumb": "wallpapers/formula-1-red-bull-car.jpg"
+ },
+ {
+  "id": "full-moon-samurai",
+  "name": "Full Moon Samurai",
+  "category": "movies",
+  "file": "wallpapers/full-moon-samurai.mp4",
+  "thumb": "wallpapers/full-moon-samurai.jpg"
+ },
+ {
+  "id": "porsche-911-gt3",
+  "name": "Porsche 911 Gt3",
+  "category": "vehicle",
+  "file": "wallpapers/porsche-911-gt3.mp4",
+  "thumb": "wallpapers/porsche-911-gt3.jpg"
+ },
+ {
+  "id": "porsche-911-in-darkness",
+  "name": "Porsche 911 In Darkness",
+  "category": "vehicle",
+  "file": "wallpapers/porsche-911-in-darkness.mp4",
+  "thumb": "wallpapers/porsche-911-in-darkness.jpg"
+ }
+]

@@ -8,6 +8,8 @@
 </head>
 <body>
 <div id="stage" class="stage">
+  <video id="wallpaper" muted loop playsinline autoplay preload="auto"></video>
+  <div id="wallpaper-dim"></div>
   <div class="bg"></div>
   <div id="glow" class="glow"></div>
 
@@ -99,6 +101,14 @@
   <div id="empty" class="empty" hidden>
     <p id="empty-text">No apps found.</p>
     <p class="hint">Press OK to try again.</p>
+  </div>
+
+  <div id="wallpicker" class="wallpicker" hidden>
+    <div class="wp-head">
+      <div class="wp-title">Wallpapers</div>
+      <div class="wp-hint">OK to apply · Back to close</div>
+    </div>
+    <div id="wallgrid" class="wp-grid"></div>
   </div>
 
   <div id="toast" class="toast"></div>
