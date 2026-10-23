@@ -641,6 +641,7 @@
       logo.className = "brand";
       logo.alt = "";
       logo.src = brand.icon;
+      if (brand.icon.indexOf("primevideo") >= 0) node.className += " prime";
       node.appendChild(logo);
     } else if (brand && brand.letter) {
       var colored = document.createElement("div");
@@ -1208,8 +1209,12 @@
     else if (action === "next") { path = "/me/player/next"; method = "POST"; }
     else if (action === "previous") { path = "/me/player/previous"; method = "POST"; }
     else return;
+    if (np && (action === "play" || action === "pause")) {
+      np.playing = action === "play";
+      renderNowPlaying();
+    }
     spotifyApi(path, method).then(function () {
-      setTimeout(pollSpotify, 350);
+      setTimeout(pollSpotify, 900);
     }).catch(function () {
       toast("Spotify is not reachable");
     });

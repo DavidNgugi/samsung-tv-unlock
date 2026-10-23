@@ -512,3 +512,7 @@ html, body {
 /* ---- static wallpaper fallback while audio plays ---- */
 .wallpaper-still { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; object-fit: cover; z-index: 1; opacity: 0; transition: opacity 200ms linear; pointer-events: none; }
 .wallpaper-still.on { opacity: 1; }
+
+/* Prime Video reads as a white plate with the blue wordmark. */
+.tile.prime { background: #ffffff; }
+.tile.prime.focus { background: #ffffff; }
