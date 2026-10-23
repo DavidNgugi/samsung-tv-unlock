@@ -11,6 +11,41 @@
 (function () {
   "use strict";
 
+  // Tizen's Spotify Web Playback SDK iframe ships allow="encrypted-media" only;
+  // without "autoplay" the browser blocks its audio element (player stays
+  // paused, no sound). Force autoplay into every iframe's allow list.
+  (function forceIframeAutoplay() {
+    function fix(n) {
+      try {
+        if (!n || n.tagName !== "IFRAME") return;
+        var a = n.getAttribute("allow") || "";
+        if (a.indexOf("autoplay") < 0) n.setAttribute("allow", (a ? a + "; " : "") + "autoplay");
+      } catch (e) {}
+    }
+    var origCreate = document.createElement;
+    document.createElement = function (tag) {
+      var node = origCreate.apply(document, arguments);
+      fix(node);
+      return node;
+    };
+    try {
+      new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          if (m.type === "childList") {
+            for (var j = 0; j < m.addedNodes.length; j++) fix(m.addedNodes[j]);
+          } else if (m.type === "attributes") {
+            fix(m.target);
+          }
+        }
+      }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["allow"] });
+    } catch (e) {}
+    setInterval(function () {
+      var fs = document.querySelectorAll("iframe");
+      for (var i = 0; i < fs.length; i++) fix(fs[i]);
+    }, 2500);
+  })();
+
   var DIAGNOSTICS = false; // in-app perf/dump beacons; off in normal builds
   var SELF = "tvunlock02.Launcher";
   var SETTINGS_APP = "com.samsung.tv.coba.setting";
@@ -103,6 +138,7 @@
     stage: document.getElementById("stage"),
     wallpaper: document.getElementById("wallpaper"),
     wallpaperDim: document.getElementById("wallpaper-dim"),
+    wallpaperStill: document.getElementById("wallpaper-still"),
     time: document.getElementById("time"),
     date: document.getElementById("date"),
     utils: document.getElementById("utils"),
@@ -162,6 +198,10 @@
   function setWallpaper(i) {
     wallpaperIndex = (i + WALLPAPERS.length) % WALLPAPERS.length;
     var wp = WALLPAPERS[wallpaperIndex];
+    if (el.wallpaperStill) {
+      if (wp.thumb) el.wallpaperStill.src = wp.thumb; else el.wallpaperStill.removeAttribute("src");
+      el.wallpaperStill.classList.remove("on");
+    }
     if (wp.file) {
       el.wallpaper.src = wp.file;
       el.wallpaper.classList.add("on");
@@ -179,6 +219,92 @@
     toast("Wallpaper: " + wp.name);
   }
   function cycleWallpaper(dir) { setWallpaper(wallpaperIndex + (dir || 1)); }
+  function probeToast(msg) {
+    el.toast.textContent = msg;
+    el.toast.className = "toast show";
+    if (toast.timer) clearTimeout(toast.timer);
+    toast.timer = setTimeout(function () { el.toast.className = "toast"; }, 9000);
+  }
+  function probeEme() {
+    if (!navigator.requestMediaKeySystemAccess) { probeToast("EME: not available"); return; }
+    probeToast("EME: probing...");
+    var cfgs = [{ initDataTypes: ["cenc"],
+      audioCapabilities: [{ contentType: 'audio/mp4; codecs="mp4a.40.2"' }] }];
+    navigator.requestMediaKeySystemAccess("com.widevine.alpha", cfgs)
+      .then(function () { probeToast("EME: Widevine audio SUPPORTED"); })
+      .catch(function () { probeToast("EME: no Widevine audio"); });
+  }
+  function testTone() {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { probeToast("Sound: no AudioContext"); return; }
+      var ctx = new AC();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.frequency.value = 660;
+      gain.gain.value = 0.06;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      setTimeout(function () { try { osc.stop(); ctx.close(); } catch (e) {} }, 1400);
+      probeToast("Sound: 660 Hz test tone playing");
+    } catch (e) {
+      probeToast("Sound: test failed");
+    }
+  }
+  var wallpaperResumeTimer = null;
+  function wallpaperMediaHold(hold) {
+    if (!el.wallpaper) return;
+    if (hold || sdkDeviceId) {
+      if (wallpaperResumeTimer) { clearTimeout(wallpaperResumeTimer); wallpaperResumeTimer = null; }
+      try { el.wallpaper.pause(); } catch (e) {}
+      // Fully release the <video> media element; pausing alone still holds the
+      // decoder/pipeline and Tizen reclaims it from Spotify after a few seconds.
+      if (el.wallpaper.getAttribute("src")) {
+        el.wallpaper.removeAttribute("src");
+        try { el.wallpaper.load(); } catch (e) {}
+      }
+      if (el.wallpaperStill && el.wallpaperStill.getAttribute("src")) el.wallpaperStill.classList.add("on");
+    } else {
+      if (wallpaperResumeTimer) clearTimeout(wallpaperResumeTimer);
+      wallpaperResumeTimer = setTimeout(function () {
+        wallpaperResumeTimer = null;
+        var wp = WALLPAPERS[wallpaperIndex];
+        if (wp && wp.file) {
+          if (el.wallpaper.getAttribute("src") !== wp.file) el.wallpaper.src = wp.file;
+          el.wallpaper.classList.add("on");
+          el.wallpaperDim.classList.add("on");
+          try { el.wallpaper.play(); } catch (e) {}
+        }
+        if (el.wallpaperStill) el.wallpaperStill.classList.remove("on");
+      }, 1600);
+    }
+  }
+  function sdkDiag() {
+    var out = "SDK";
+    var ifr = document.querySelectorAll("iframe");
+    var aud = document.querySelectorAll("audio");
+    out += " ifr=" + ifr.length + " aud=" + aud.length;
+    if (ifr[0]) {
+      var f = ifr[0];
+      out += " sbx=" + (f.getAttribute("sandbox") || "-");
+      var before = String(f.allow || "-").slice(0, 12);
+      try { f.setAttribute("allow", "autoplay; encrypted-media; fullscreen"); } catch (e) {}
+      out += " before=" + before + " now=" + String(f.allow || "-").slice(0, 24);
+    }
+    for (var i = 0; i < aud.length && i < 2; i++) {
+      out += " [m" + (aud[i].muted ? 1 : 0) + "p" + (aud[i].paused ? 1 : 0) + "v" + Math.round(aud[i].volume * 100) + "]";
+      try { if (aud[i].muted) aud[i].muted = false; if (aud[i].paused) aud[i].play(); } catch (e) {}
+    }
+    if (!sdkPlayer) { probeToast(out + " no-player"); return; }
+    sdkPlayer.getVolume().then(function (v) {
+      out += " vol=" + Math.round(v * 100);
+      return sdkPlayer.getCurrentState();
+    }).then(function (st) {
+      out += st ? (" paused=" + st.paused) : " state=null";
+      probeToast(out);
+    }).catch(function () { probeToast(out + " ERR"); });
+  }
   function applySavedWallpaper() {
     var id = "";
     try { id = localStorage.getItem("tv-wallpaper") || ""; } catch (e) {}
@@ -209,10 +335,10 @@
     }
     var node = nodes[state.wallIndex];
     if (node) {
-      var top = node.offsetTop, bottom = top + node.offsetHeight;
-      if (top < el.wallgrid.scrollTop) el.wallgrid.scrollTop = top;
-      else if (bottom > el.wallgrid.scrollTop + el.wallgrid.clientHeight)
-        el.wallgrid.scrollTop = bottom - el.wallgrid.clientHeight;
+      var g = el.wallgrid.getBoundingClientRect();
+      var n = node.getBoundingClientRect();
+      if (n.top < g.top) el.wallgrid.scrollTop += (n.top - g.top);
+      else if (n.bottom > g.bottom) el.wallgrid.scrollTop += (n.bottom - g.bottom);
     }
   }
   function renderWallPicker() {
@@ -265,6 +391,7 @@
     { key: "music", label: "Music" },
     { key: "theme", label: "Theme" },
     { key: "wall", label: "Wallpaper" },
+    { key: "diag", label: "Diag" },
     { key: "home", label: "Samsung Home" }
   ];
 
@@ -942,8 +1069,74 @@
     });
   }
 
+  var sdkPlayer = null;
+  var sdkDeviceId = null;
+  var sdkLastTrack = null;
+  var sdkLastActivate = 0;
+  function keepSdkActive() {
+    if (!sdkPlayer || !sdkPlayer.activateElement) return;
+    if (Date.now() - sdkLastActivate < 1800) return;
+    sdkLastActivate = Date.now();
+    try { sdkPlayer.activateElement(); } catch (e) {}
+  }
+  function initSpotifySdk() {
+    if (!window.Spotify || !window.Spotify.Player || sdkPlayer) return;
+    sdkPlayer = new window.Spotify.Player({
+      name: "Clean Home TV",
+      getOAuthToken: function (cb) {
+        spotifyRefreshToken().then(function () { cb(spotifyAccess.token); })
+          .catch(function () { cb(""); });
+      }
+    });
+    sdkPlayer.addListener("ready", function (d) {
+      sdkDeviceId = d.device_id;
+      if (sdkPlayer.activateElement) { try { sdkPlayer.activateElement(); } catch (e) {} }
+      toast("Spotify: in-app player ready");
+    });
+    sdkPlayer.addListener("not_ready", function () { sdkDeviceId = null; wallpaperMediaHold(false); });
+    sdkPlayer.addListener("player_state_changed", function (st) {
+      if (!st) return;
+      var t = st.track_window && st.track_window.current_track;
+      if (!t) return;
+      var imgs = (t.album && t.album.images) || [];
+      np = {
+        playing: !st.paused,
+        title: t.name || "",
+        artist: (t.artists || []).map(function (a) { return a.name; }).join(", "),
+        art: imgs.length ? imgs[0].url : "",
+        progress_ms: st.position || 0,
+        duration_ms: st.duration || 0
+      };
+      var tid = t.id || t.uri || "";
+      if (tid !== sdkLastTrack) {
+        sdkLastTrack = tid;
+        setTimeout(function () {
+          if (sdkPlayer && sdkPlayer.activateElement) { try { sdkPlayer.activateElement(); } catch (e) {} }
+        }, 600);
+      }
+      renderNowPlaying();
+      wallpaperMediaHold(!st.paused);
+    });
+    sdkPlayer.connect();
+  }
+  window.onSpotifyWebPlaybackSDKReady = initSpotifySdk;
+
   function spotifyPlayOnTV(retry) {
     retry = retry || 0;
+    if (sdkDeviceId) {
+      if (sdkPlayer && sdkPlayer.activateElement) {
+        try { sdkPlayer.activateElement(); } catch (e) {}
+      }
+      if (sdkPlayer && sdkPlayer.resume) {
+        try { sdkPlayer.resume().catch(function () {}); } catch (e) {}
+      }
+      spotifyApi("/me/player", "PUT", null, { device_ids: [sdkDeviceId], play: true }).then(function (res) {
+        toast("SDK transfer: " + res.status);
+        wallpaperMediaHold(true);
+        setTimeout(pollSpotify, 800);
+      }).catch(function () { toast("Could not start playback"); });
+      return;
+    }
     spotifyApi("/me/player/devices").then(function (res) { return res.json(); }).then(function (data) {
       var devices = (data && data.devices) || [];
       var tv = null;
@@ -1099,6 +1292,7 @@
       if (util.key === "music") { openMusic(); return; }
       if (util.key === "theme") { cycleTheme(); return; }
       if (util.key === "wall") { openWallPicker(); return; }
+      if (util.key === "diag") { sdkDiag(); return; }
       launch({ id: SAMSUNG_HOME, name: "Samsung Home" });
       return;
     }
@@ -1795,7 +1989,8 @@
     setInterval(tick, 15000);
     if (window.tizen && window.tizen.tvinputdevice) {
       ["MediaPlayPause", "MediaPlay", "MediaPause", "MediaStop",
-       "MediaTrackPrevious", "MediaTrackNext", "MediaFastForward", "MediaRewind"
+       "MediaTrackPrevious", "MediaTrackNext", "MediaFastForward", "MediaRewind",
+       "ColorF0Red", "ColorF1Green", "ColorF2Yellow", "ColorF3Blue", "Info"
       ].forEach(function (name) {
         try { window.tizen.tvinputdevice.registerKey(name); } catch (e) {}
       });
@@ -1813,6 +2008,13 @@
     loadWallpaperCatalog();
     try { SPOTIFY_URL = localStorage.getItem("spotifyUrl") || SPOTIFY_URL; } catch (e) {}
     setTimeout(pollSpotify, 1500);
+    if (SPOTIFY_CLIENT_ID && SPOTIFY_REFRESH) { spotifyRefreshToken().catch(function () {}); }
+    if (!window.Spotify) {
+      var sdkScript = document.createElement("script");
+      sdkScript.src = "https://sdk.scdn.co/spotify-player.js";
+      sdkScript.async = true;
+      document.head.appendChild(sdkScript);
+    }
     try {
       if (window.tizen && tizen.application && tizen.application.addAppInfoEventListener) {
         tizen.application.addAppInfoEventListener(function (info) {
@@ -1851,8 +2053,13 @@
   window.addEventListener("resize", fit);
   document.addEventListener("keydown", onKeyDown);
   document.addEventListener("keydown", function (e) {
+    if (sdkPlayer && sdkPlayer.activateElement && (!document._lastAct || Date.now() - document._lastAct > 3000)) {
+      document._lastAct = Date.now();
+      try { sdkPlayer.activateElement(); } catch (err) {}
+    }
     if (e.keyCode === 403) { cycleWallpaper(1); e.preventDefault(); }
     else if (e.keyCode === 404) { cycleWallpaper(-1); e.preventDefault(); }
+    else if (e.keyCode === 405 || e.keyCode === 406 || e.keyCode === 56 || e.keyCode === 457) { probeEme(); e.preventDefault(); }
     else if (e.keyCode === 87) { cycleWallpaper(1); }
   });
   document.addEventListener("keyup", onKeyUp);

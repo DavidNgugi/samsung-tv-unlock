@@ -29,7 +29,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 AUTH = "https://accounts.spotify.com"
 API = "https://api.spotify.com/v1"
-SCOPES = "user-read-playback-state user-modify-playback-state user-read-currently-playing"
+SCOPES = ("streaming user-read-email user-read-private "
+          "user-read-playback-state user-modify-playback-state user-read-currently-playing")
 TOKEN_FILE = os.path.expanduser("~/.tv-unlock-spotify.json")
 REDIRECT = "http://127.0.0.1:8795/callback"
 

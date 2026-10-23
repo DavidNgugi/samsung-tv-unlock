@@ -11,3 +11,6 @@ signature1.xml
 apps/Launcher/config.js
 apps/Launcher/wallpapers/*.mp4
 apps/Launcher/wallpapers/*.jpg
+PLAN-ambient-dashboard.md
+.DS_Store
+**/.DS_Store
