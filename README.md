@@ -5,10 +5,13 @@ open it — no root, no store, and every step is reversible.
 
 ![Clean Home running on a Samsung AU8000](docs/hero.jpg)
 
-- Clean, Apple-TV-style launcher: dock, All apps, sources, clock
+- Clean, Apple-TV-style launcher: app-card dock, All apps, clock + weather
+- **Hidden Controls** popover: inputs, Wi-Fi, TV settings, theme, diagnostics
 - Physical **Home button → Clean Home** (works on Tizen 6, no root)
 - **Instant** switching (the launcher stays resident)
 - Optional **Spotify now-playing** card and controls
+- **Browser preview** (`tools/preview.sh`) — iterate the UI without a TV
+- **Guided installer** (`python3 install.py`) — a local wizard, no CLI flags
 - One-command **backup** and **restore**
 
 ---
@@ -33,16 +36,23 @@ possible — see the table at the bottom.
     Home → Apps → App Settings → type **12345** → Developer Mode **On** →
     set **Host PC IP** to your computer → restart the TV.
 
-**Step 4.** Clone and run the installer:
+**Step 4.** Clone and start the guided installer:
 
 ~~~bash
-git clone https://github.com/DavidNgugi/samsung-tv-unlock.git cleanmysamsungtv
-cd cleanmysamsungtv
-tools/setup.sh
+git clone https://github.com/DavidNgugi/samsung-tv-unlock.git
+cd samsung-tv-unlock
+python3 install.py
 ~~~
 
-    It asks for the TV IP, your certificate profile, and an optional Spotify URL,
-    then builds and installs Clean Home.
+    It opens a local wizard at `http://127.0.0.1:8765` that finds your TV on the
+    network, walks through Developer Mode and the certificate profile, then builds
+    and installs Clean Home. It binds to localhost only.
+
+    No wizard? The same install from the terminal:
+
+~~~bash
+tools/deploy-launcher.sh
+~~~
 
 **Step 5.** Open **Clean Home** from the TV's app list. Done — you have your
 launcher.

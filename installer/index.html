@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clean Home — Setup</title>
+<link rel="stylesheet" href="/installer/installer.css">
+</head>
+<body>
+<div class="bg"></div>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <span class="brand-icon"><img src="/appicon" alt=""></span>
+      <span><span class="brand-name">Clean Home</span><span class="brand-sub">Setup</span></span>
+    </div>
+    <nav id="steps" class="steps"></nav>
+    <div class="side-foot">
+      <div class="muted">Open source. No root required.</div>
+      <a class="link" href="https://github.com/DavidNgugi/samsung-tv-unlock" target="_blank" rel="noreferrer">github.com/DavidNgugi/samsung-tv-unlock</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="step-label" id="step-label"></div>
+    <h1 id="step-title"></h1>
+    <p class="lede" id="step-lede"></p>
+    <div id="step-body" class="step-body"></div>
+    <div class="actions">
+      <button class="ghost" id="back" type="button">Back</button>
+      <button class="primary" id="next" type="button">Continue</button>
+    </div>
+  </main>
+</div>
+<script>window.INSTALLER_TOKEN = new URLSearchParams(location.search).get("t") || "";</script>
+<script src="/installer/installer.js"></script>
+</body>
+</html>
