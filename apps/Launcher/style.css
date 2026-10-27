@@ -519,9 +519,11 @@ html, body {
 
 /* ---- app-store style icons + weather ---- */
 .tile img.appicon { width: 100%; height: 100%; object-fit: contain; border-radius: 16px; }
-.weather { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 22px; color: rgba(243,245,248,0.72); }
-.wx-icon { font-size: 24px; }
-.wx-hilo { color: rgba(243,245,248,0.42); font-size: 18px; }
+.weather { display: flex; align-items: center; gap: 12px; margin-top: 14px; font-size: 27px; line-height: 34px; color: rgba(243,245,248,0.82); }
+.wx-icon { width: 34px; height: 34px; flex: none; color: rgba(243,245,248,0.85); }
+.wx-icon svg { width: 100%; height: 100%; display: block; }
+.wx-temp { font-weight: 500; letter-spacing: -0.4px; }
+.wx-hilo { color: rgba(243,245,248,0.46); font-size: 20px; letter-spacing: 0.2px; margin-left: 2px; }
 
 .tile img.brandcard { width: 100%; height: 100%; object-fit: contain; border-radius: 16px; }
 
