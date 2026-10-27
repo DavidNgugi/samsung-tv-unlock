@@ -552,3 +552,6 @@ html, body {
 /* the source rail is retired; inputs live in the controls popover */
 .rail { display: none !important; }
 .ctrl-icon { width: 30px; height: 30px; flex: none; margin-right: 14px; }
+
+/* Dock icons fill their tile; the -10px label nudge is for grid tiles only. */
+.dock .tile img, .dock .tile .mark { transform: none; }
