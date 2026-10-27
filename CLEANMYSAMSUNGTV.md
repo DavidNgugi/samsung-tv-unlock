@@ -167,9 +167,9 @@ app.
 ### 3.5 The build loop
 
 ~~~bash
-tizen package -t wgt -s peregrine-samsung -o build -- apps/peregrine-tv
-tizen install -n build/Peregrine.wgt
-tizen run -p tvunlock01.Peregrine
+tizen package -t wgt -s peregrine-samsung -o build -- apps/Launcher
+tizen install -n build/CleanHome.wgt
+tizen run -p tvunlock02.Launcher
 ~~~
 
 Ten seconds, no store, no review.
