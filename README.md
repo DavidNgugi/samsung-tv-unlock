@@ -141,8 +141,11 @@ alone — restore it from your backup with `docs/HOME-BUTTON.md`.
 | 8.0 | 2023 | yes | via native setter / root | yes (samsung-tv-root) |
 | 9.0 / 10 | 2024–25 | yes | via native setter / root | yes (temporary root) |
 
-Most published projects target Tizen 8/9/10 and need root or a .NET helper:
+Published launchers and what they need:
 
+- [Zen TV](https://github.com/princepozo/zen-tv) — Tizen 4, a calm Apple-TV-style
+  web launcher; no root. The design reference for Clean Home's dock cards,
+  Controls popover and weather row.
 - [CleanFrame](https://github.com/nthnclrk/CleanFrame) — Tizen 9, native .NET/NUI,
   temporary root, Home via `app_control_set_defapp` + vconf.
 - [quiet-tizen](https://github.com/jss8649/quiet-tizen) — Tizen 9, .NET, temporary
