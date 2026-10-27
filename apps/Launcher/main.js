@@ -1641,27 +1641,16 @@
 
   // Weather: a small segment under the date (Open-Meteo, no key, CORS-friendly).
   var WX_CFG = (window.TV_CONFIG && window.TV_CONFIG.weather) || null;
-  var WX_ICONS = {
-    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/></svg>',
-    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>',
-    partly: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="9" cy="9" r="3.4"/><path d="M9 2.5v1.8M2.5 9h1.8M4.7 4.7l1.3 1.3M13.3 4.7l-1.3 1.3"/><path d="M8 19h9a3.2 3.2 0 0 0 0-6.4h-.6A4.6 4.6 0 0 0 8 14.4"/></svg>',
-    cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6.5 18.5h11a3.6 3.6 0 0 0 0-7.2h-.7A5.2 5.2 0 0 0 6.5 13"/></svg>',
-    fog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9h16M4 13h16M4 17h10"/></svg>',
-    rain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6.5 15.5h11a3.4 3.4 0 0 0 0-6.8h-.6A5 5 0 0 0 6.5 10.6"/><path d="M8 18l-1 2M12 18l-1 2M16 18l-1 2"/></svg>',
-    showers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6.5 14.5h11a3.4 3.4 0 0 0 0-6.8h-.6A5 5 0 0 0 6.5 9.6"/><path d="M8 17l-1.2 2.5M12 17l-1.2 2.5M16 17l-1.2 2.5"/></svg>',
-    snow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6.5 14.5h11a3.4 3.4 0 0 0 0-6.8h-.6A5 5 0 0 0 6.5 9.6"/><path d="M8 18v2M7 19h2M12 18v2M11 19h2M16 18v2M15 19h2"/></svg>',
-    storm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 14.5h11a3.4 3.4 0 0 0 0-6.8h-.6A5 5 0 0 0 6.5 9.6"/><path d="M13 14l-3 4h3l-2 4"/></svg>'
-  };
   function weatherIcon(code, isDay) {
-    if (code === 0) return isDay ? "sun" : "moon";
-    if (code <= 2) return "partly";
-    if (code === 3) return "cloud";
-    if (code === 45 || code === 48) return "fog";
-    if (code >= 51 && code <= 67) return "rain";
-    if (code >= 71 && code <= 77) return "snow";
-    if (code >= 80 && code <= 82) return "showers";
-    if (code >= 95) return "storm";
-    return "cloud";
+    if (code === 0) return isDay ? "\u2600" : "\u263E";
+    if (code <= 2) return "\u26C5";
+    if (code === 3) return "\u2601";
+    if (code === 45 || code === 48) return "\u2591";
+    if (code >= 51 && code <= 67) return "\u2602";
+    if (code >= 71 && code <= 77) return "\u2744";
+    if (code >= 80 && code <= 82) return "\u2614";
+    if (code >= 95) return "\u26A1";
+    return "\u2600";
   }
   function loadWeather() {
     if (!WX_CFG || WX_CFG.latitude == null || WX_CFG.longitude == null) return;
@@ -1673,9 +1662,9 @@
     fetch(url, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (d) {
       var c = d && d.current, day = d && d.daily;
       if (!c || !day) return;
-      el.wxIcon.innerHTML = WX_ICONS[weatherIcon(c.weather_code, c.is_day === 1)];
+      setText(el.wxIcon, weatherIcon(c.weather_code, c.is_day === 1));
       setText(el.wxTemp, Math.round(c.temperature_2m) + "\u00B0");
-      setText(el.wxHilo, "H:" + Math.round(day.temperature_2m_max[0]) + "\u00B0 L:" + Math.round(day.temperature_2m_min[0]) + "\u00B0");
+      setText(el.wxHilo, "H:" + Math.round(day.temperature_2m_max[0]) + "\u00B0\u00A0\u00A0L:" + Math.round(day.temperature_2m_min[0]) + "\u00B0");
       el.weather.hidden = false;
     }).catch(function () {});
   }
