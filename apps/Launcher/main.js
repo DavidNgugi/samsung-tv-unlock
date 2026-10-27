@@ -327,7 +327,18 @@
   }
   function loadWallpaperCatalog() {
     var settled = false;
-    function settle() { if (settled) return; settled = true; if (!applySavedWallpaper()) setWallpaper(0); }
+    function settle() {
+      if (settled) return;
+      settled = true;
+      if (applySavedWallpaper()) return;
+      if (hasTizen()) { setWallpaper(0); return; }
+      // Browser preview: start on one of the bundled wallpapers, not black.
+      var pick = 1;
+      for (var i = 0; i < WALLPAPERS.length; i++) {
+        if (WALLPAPERS[i].id === "crimson-bonsai-minimalist") { pick = i; break; }
+      }
+      setWallpaper(pick);
+    }
     fetch("wallpapers.json", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (list) {
       if (!Array.isArray(list) || !list.length) { settle(); return; }
       var off = WALLPAPERS.filter(function (w) { return !w.file; });
