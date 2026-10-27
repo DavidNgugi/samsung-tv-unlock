@@ -144,6 +144,19 @@ the button can be taken over without root.
 
 ---
 
+## Preview (no TV needed)
+
+~~~bash
+tools/preview.sh
+~~~
+
+Serves `apps/Launcher` at `http://127.0.0.1:8090/` and opens it in your browser.
+The launcher detects the missing Tizen APIs and falls back to demo data, so you can
+iterate layout, focus, wallpapers, Controls and weather without packaging.
+
+- `PORT=9000 tools/preview.sh` — different port
+- Edit `apps/Launcher/*` and refresh the browser; no `.wgt` build needed
+
 ## More
 
 - [docs/SETUP.md](docs/SETUP.md) — the full walkthrough

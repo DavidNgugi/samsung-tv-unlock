@@ -90,11 +90,11 @@
 
   var BRANDS = [
     { match: "netflix", icon: "icons/netflix.svg", color: "#E50914" },
-    { match: "youtube", icon: "icons/youtube.svg", color: "#FF0000" },
+    { match: "youtube", icon: "icons/youtube-card.svg", color: "#FF0000", card: true },
     { match: "spotify", icon: "icons/spotify.svg", color: "#1DB954" },
     { match: "plex", icon: "icons/plex.svg", color: "#E5A00D" },
     { match: "apple tv", icon: "icons/appletv.svg", color: "#FFFFFF" },
-    { match: "prime video", icon: "icons/primevideo.svg", color: "#00A8E1" },
+    { match: "prime video", icon: "icons/primevideo-card.svg", color: "#00A8E1", card: true },
     { match: "dstv", icon: "icons/dstv.png", color: "#00A8E1" },
     { match: "disney", letter: "D+", color: "#6C8CFF" }
   ];
@@ -116,6 +116,8 @@
     musicIndex: 1,
     wallOpen: false,
     wallIndex: 1,
+    controlsOpen: false,
+    controlsIndex: 0,
     reordering: false,
     reorderOriginal: null,
     holdTimer: null,
@@ -141,6 +143,12 @@
     wallpaperStill: document.getElementById("wallpaper-still"),
     time: document.getElementById("time"),
     date: document.getElementById("date"),
+    weather: document.getElementById("weather"),
+    wxIcon: document.getElementById("wx-icon"),
+    wxTemp: document.getElementById("wx-temp"),
+    wxHilo: document.getElementById("wx-hilo"),
+    controls: document.getElementById("controls"),
+    controlsList: document.getElementById("controls-list"),
     utils: document.getElementById("utils"),
     utilPlate: document.getElementById("util-plate"),
     railPlate: document.getElementById("rail-plate"),
@@ -388,12 +396,74 @@
     { key: "refresh", label: "Refresh" },
     { key: "edit", label: "Edit Home" },
     { key: "store", label: "App Store" },
-    { key: "music", label: "Music" },
-    { key: "theme", label: "Theme" },
     { key: "wall", label: "Wallpaper" },
-    { key: "diag", label: "Diag" },
-    { key: "home", label: "Samsung Home" }
+    { key: "controls", label: "Settings" }
   ];
+
+  var CONTROLS = [
+    { key: "tv", label: "TV", sub: "Tuner", icon: "icons/tv.svg" },
+    { key: "hdmi1", label: "HDMI 1", icon: "icons/hdmi.svg" },
+    { key: "hdmi2", label: "HDMI 2", icon: "icons/hdmi.svg" },
+    { key: "hdmi3", label: "HDMI 3", icon: "icons/hdmi.svg" },
+    { key: "hdmi4", label: "HDMI 4", icon: "icons/hdmi.svg" },
+    { key: "ambient", label: "Ambient", icon: "icons/ambient.svg" },
+    { key: "wifi", label: "Wi-Fi", icon: "icons/wifi-on.svg" },
+    { key: "settings", label: "TV settings", icon: "icons/gear.svg" },
+    { key: "theme", label: "Theme", icon: "icons/theme.svg" },
+    { key: "diag", label: "Diag", icon: "icons/diag.svg" },
+    { key: "home", label: "Samsung Home", icon: "icons/home.svg" }
+  ];
+  function renderControls() {
+    el.controlsList.innerHTML = "";
+    CONTROLS.forEach(function (item, i) {
+      var row = document.createElement("div");
+      row.className = "ctrl-item" + (i === state.controlsIndex ? " focus" : "");
+      if (item.icon) {
+        var ic = document.createElement("img");
+        ic.className = "ctrl-icon";
+        ic.alt = "";
+        ic.src = item.icon;
+        row.appendChild(ic);
+      }
+      var label = document.createElement("span");
+      label.textContent = item.label;
+      row.appendChild(label);
+      if (item.sub) {
+        var sub = document.createElement("span");
+        sub.className = "sub";
+        sub.textContent = item.sub;
+        row.appendChild(sub);
+      }
+      el.controlsList.appendChild(row);
+    });
+  }
+  function openControls() {
+    state.controlsOpen = true;
+    state.controlsIndex = 0;
+    el.controls.hidden = false;
+    renderControls();
+  }
+  function closeControls() {
+    state.controlsOpen = false;
+    el.controls.hidden = true;
+  }
+  function controlsMove(d) {
+    state.controlsIndex = Math.max(0, Math.min(CONTROLS.length - 1, state.controlsIndex + d));
+    renderControls();
+  }
+  function controlsActivate() {
+    var item = CONTROLS[state.controlsIndex];
+    if (!item) return;
+    closeControls();
+    if (item.key === "tv") { launch({ id: LIVETV_APP, name: "TV" }); return; }
+    if (item.key.indexOf("hdmi") === 0) { switchSource("HDMI" + item.key.slice(4)); return; }
+    if (item.key === "ambient") { launch({ id: "org.tizen.ambientapp", name: "Ambient" }); return; }
+    if (item.key === "wifi") { launch({ id: NETWORK_SETTINGS, name: "Wi-Fi" }); return; }
+    if (item.key === "settings") { launch({ id: SETTINGS_APP, name: "TV settings" }); return; }
+    if (item.key === "theme") { cycleTheme(); return; }
+    if (item.key === "diag") { sdkDiag(); return; }
+    if (item.key === "home") { launch({ id: SAMSUNG_HOME, name: "Samsung Home" }); return; }
+  }
 
   var store = loadStore();
 
@@ -605,9 +675,6 @@
       if (chosen.length < MAX_DOCK - 1 && chosen.indexOf(app) < 0 &&
           !blockedOnHome(app) && isCurated(app)) chosen.push(app);
     });
-    var settings = findById(apps, SETTINGS_APP);
-    if (settings) chosen.push(settings);
-
     return chosen.slice(0, MAX_DOCK);
   }
 
@@ -620,12 +687,14 @@
     var brand = brandFor(app.name);
 
     if (app.id === LIVETV_APP) {
+      node.className += " dark";
       var tv = document.createElement("img");
       tv.className = "brand";
       tv.alt = "";
       tv.src = "icons/tv.svg";
       node.appendChild(tv);
     } else if (app.id === SETTINGS_APP) {
+      node.className += " dark";
       var gear = document.createElement("img");
       gear.className = "brand";
       gear.alt = "";
@@ -636,12 +705,40 @@
       more.className = "mark";
       more.textContent = "⋯";
       node.appendChild(more);
+    } else if (brand && brand.card) {
+      // A brand whose TV icon is a generic placeholder (YouTube on this firmware).
+      var card = document.createElement("img");
+      card.className = "brandcard";
+      card.alt = "";
+      card.src = brand.icon;
+      node.appendChild(card);
+    } else if (app.iconPath) {
+      // The TV's own app card (Netflix wordmark, Prime blue card…)
+      var img = document.createElement("img");
+      img.className = "appicon";
+      img.alt = "";
+      img.onerror = function () {
+        if (img.parentNode === node) node.removeChild(img);
+        if (brand && brand.icon) {
+          var logo = document.createElement("img");
+          logo.className = "brand";
+          logo.alt = "";
+          logo.src = brand.icon;
+          node.appendChild(logo);
+        } else {
+          var mark = document.createElement("div");
+          mark.className = "mark";
+          mark.textContent = initial(app.name);
+          node.appendChild(mark);
+        }
+      };
+      img.src = app.iconPath;
+      node.appendChild(img);
     } else if (brand && brand.icon) {
       var logo = document.createElement("img");
       logo.className = "brand";
       logo.alt = "";
       logo.src = brand.icon;
-      if (brand.icon.indexOf("primevideo") >= 0) node.className += " prime";
       node.appendChild(logo);
     } else if (brand && brand.letter) {
       var colored = document.createElement("div");
@@ -649,18 +746,6 @@
       colored.style.color = brand.color;
       colored.textContent = brand.letter;
       node.appendChild(colored);
-    } else if (app.iconPath) {
-      var img = document.createElement("img");
-      img.alt = "";
-      img.onerror = function () {
-        if (img.parentNode === node) node.removeChild(img);
-        var mark = document.createElement("div");
-        mark.className = "mark";
-        mark.textContent = initial(app.name);
-        node.appendChild(mark);
-      };
-      img.src = app.iconPath;
-      node.appendChild(img);
     } else {
       var mark = document.createElement("div");
       mark.className = "mark";
@@ -688,9 +773,17 @@
       var chip = document.createElement("span");
       chip.className = "chip";
       node.appendChild(chip);
-      var label = document.createElement("span");
-      label.textContent = util.label;
-      node.appendChild(label);
+      if (util.key === "controls") {
+        var gear = document.createElement("img");
+        gear.className = "util-gear";
+        gear.alt = "";
+        gear.src = "icons/gear.svg";
+        node.appendChild(gear);
+      } else {
+        var label = document.createElement("span");
+        label.textContent = util.label;
+        node.appendChild(label);
+      }
       el.utils.appendChild(node);
     });
   }
@@ -1295,10 +1388,8 @@
       if (util.key === "edit") { showGrid(true); return; }
       if (util.key === "store") { launchStore(); return; }
       if (util.key === "music") { openMusic(); return; }
-      if (util.key === "theme") { cycleTheme(); return; }
       if (util.key === "wall") { openWallPicker(); return; }
-      if (util.key === "diag") { sdkDiag(); return; }
-      launch({ id: SAMSUNG_HOME, name: "Samsung Home" });
+      if (util.key === "controls") { openControls(); return; }
       return;
     }
     launch(state.dock[state.dockIndex]);
@@ -1324,7 +1415,7 @@
     state.zone = "dock";
     el.grid.hidden = true;
     el.dock.hidden = !state.dock.length;
-    el.rail.hidden = false;
+    el.rail.hidden = true;
     el.grid.style.transform = "";
     paintFocus();
   }
@@ -1403,7 +1494,7 @@
       if (np && np.title) state.zone = "card";
       else { state.zone = "utils"; state.utilIndex = 0; }
     }
-    if (key === 40) { state.zone = "rail"; state.railIndex = 0; }
+    if (key === 40) return;
     paintFocus();
   }
 
@@ -1443,6 +1534,14 @@
       if (key === 40) { wallMove(6); event.preventDefault(); return; }
       if (key === 13) { wallActivate(); event.preventDefault(); return; }
       if (key === 10009 || key === 27) { closeWallPicker(); event.preventDefault(); return; }
+      event.preventDefault(); return;
+    }
+
+    if (state.controlsOpen) {
+      if (key === 38) { controlsMove(-1); event.preventDefault(); return; }
+      if (key === 40) { controlsMove(1); event.preventDefault(); return; }
+      if (key === 13) { controlsActivate(); event.preventDefault(); return; }
+      if (key === 10009 || key === 27) { closeControls(); event.preventDefault(); return; }
       event.preventDefault(); return;
     }
 
@@ -1525,6 +1624,36 @@
       weekday: "long", day: "numeric", month: "long"
     });
     if (el.greeting) el.greeting.textContent = greetingFor(now.getHours());
+  }
+
+  // Weather: a small segment under the date (Open-Meteo, no key, CORS-friendly).
+  var WX_CFG = (window.TV_CONFIG && window.TV_CONFIG.weather) || null;
+  function weatherIcon(code, isDay) {
+    if (code === 0) return isDay ? "\u2600" : "\u263E";
+    if (code <= 2) return "\u26C5";
+    if (code === 3) return "\u2601";
+    if (code === 45 || code === 48) return "\u2591";
+    if (code >= 51 && code <= 67) return "\u2602";
+    if (code >= 71 && code <= 77) return "\u2744";
+    if (code >= 80 && code <= 82) return "\u2614";
+    if (code >= 95) return "\u26A1";
+    return "\u2600";
+  }
+  function loadWeather() {
+    if (!WX_CFG || WX_CFG.latitude == null || WX_CFG.longitude == null) return;
+    var url = "https://api.open-meteo.com/v1/forecast?latitude=" + WX_CFG.latitude +
+      "&longitude=" + WX_CFG.longitude +
+      "&current=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min" +
+      "&temperature_unit=" + (WX_CFG.units === "fahrenheit" ? "fahrenheit" : "celsius") +
+      "&timezone=auto&forecast_days=1";
+    fetch(url, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (d) {
+      var c = d && d.current, day = d && d.daily;
+      if (!c || !day) return;
+      setText(el.wxIcon, weatherIcon(c.weather_code, c.is_day === 1));
+      setText(el.wxTemp, Math.round(c.temperature_2m) + "\u00B0");
+      setText(el.wxHilo, "H:" + Math.round(day.temperature_2m_max[0]) + "\u00B0 L:" + Math.round(day.temperature_2m_min[0]) + "\u00B0");
+      el.weather.hidden = false;
+    }).catch(function () {});
   }
 
   // ---------------------------------------------------------------- boot
@@ -1935,6 +2064,9 @@
       saveStore();
     }
 
+    state.dock = state.dock.filter(function (a) { return a.id !== SETTINGS_APP; });
+    store.dock = state.dock.map(function (a) { return a.id; });
+
     el.empty.hidden = apps.length > 0;
     if (!apps.length) el.emptyText.textContent = "The TV returned an empty app list.";
 
@@ -1992,6 +2124,8 @@
     fit();
     tick();
     setInterval(tick, 15000);
+    loadWeather();
+    setInterval(loadWeather, 900000);
     if (window.tizen && window.tizen.tvinputdevice) {
       ["MediaPlayPause", "MediaPlay", "MediaPause", "MediaStop",
        "MediaTrackPrevious", "MediaTrackNext", "MediaFastForward", "MediaRewind",
