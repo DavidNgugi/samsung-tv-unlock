@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
-  <rect width="240" height="240" rx="46" fill="#00A8E1"/>
-  <text x="120" y="124" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="700" fill="#FFFFFF">prime video</text>
-  <path d="M58 148 Q120 178 182 148" stroke="#FFFFFF" stroke-width="7" fill="none" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <rect width="160" height="160" rx="20" fill="#00A8E1"/>
+  <text x="80" y="84" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">prime video</text>
+  <path d="M36 98 Q80 116 124 98" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round"/>
 </svg>
