@@ -233,7 +233,7 @@ html, body {
   transition: transform 180ms cubic-bezier(.2,.7,.2,1), opacity 120ms linear;
 }
 .dock .tile, .grid .tile { z-index: 1; }
-.dock .tile { width: 160px; height: 160px; margin-right: 14px; padding: 0 4px; }
+.dock .tile { width: 160px; height: 160px; margin-right: 14px; }
 .dock .plate { width: 160px; height: 160px; }
 
 /* ---- grid ---- */

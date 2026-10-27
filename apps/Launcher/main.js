@@ -881,9 +881,9 @@
     if (!plate || plate._tile === tile) return;
     plate._tile = tile;
     if (!tile) { plate.style.opacity = "0"; return; }
-    // The focused tile lifts 8px and scales 1.04; match it so the glass plate
-    // does not hang below the card.
-    plate.style.transform = "translate(" + tile.offsetLeft + "px," + (tile.offsetTop - 8) + "px) scale(1.04)";
+    // Follow the focused tile's 8px lift exactly. The plate is the same size as
+    // the tile, so a card that fills the tile hides it completely.
+    plate.style.transform = "translate(" + tile.offsetLeft + "px," + (tile.offsetTop - 8) + "px)";
     plate.style.opacity = "1";
   }
 
