@@ -69,12 +69,8 @@
     { id: "3201910019365", name: "Prime Video" },
     { id: "111299001912", name: "YouTube" },
     { id: "3201512006785", name: "Plex", iconPath: "icons/apps/plex.png" },
-    { id: "3201710017644", name: "Gallery" },
     { id: "3201606009684", name: "Spotify", iconPath: "icons/apps/spotify.png" },
-    { id: "3201807016597", name: "Disney+" },
     { id: "3201703007751", name: "Apple TV" },
-    { id: "3201907018808", name: "Hulu" },
-    { id: "3201812017479", name: "Max" },
     { id: "CXNLCPYe82.dstvnow", name: "DStv Stream", iconPath: "icons/apps/dstv.png" },
     { id: "org.tizen.browser", name: "Internet", iconPath: "icons/apps/internet.png" },
     { id: "com.samsung.tv.coba.livetv", name: "LiveTV" }
@@ -96,7 +92,7 @@
     { match: "youtube", icon: "icons/youtube-card.svg", color: "#FF0000", card: true },
     { match: "spotify", icon: "icons/spotify.svg", color: "#1DB954" },
     { match: "plex", icon: "icons/plex.svg", color: "#E5A00D" },
-    { match: "apple tv", icon: "icons/appletv.svg", color: "#FFFFFF" },
+    { match: "apple tv", icon: "icons/appletv.svg", color: "#FFFFFF", dark: true },
     { match: "prime video", icon: "icons/primevideo-card.svg", color: "#00A8E1", card: true },
     { match: "dstv", icon: "icons/dstv.png", color: "#00A8E1" },
     { match: "disney", letter: "D+", color: "#6C8CFF" }
@@ -699,6 +695,7 @@
     node.setAttribute("data-index", index);
 
     var brand = brandFor(app.name);
+    if (brand && brand.dark) node.className += " dark";
 
     if (app.id === LIVETV_APP) {
       node.className += " dark";
