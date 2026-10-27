@@ -1,9 +1,9 @@
-# Clean Home for Samsung Tizen TVs
+<p align="center"><img src="docs/launcher-icon.png" width="92" alt="Clean Home"></p>
+<h1 align="center">Clean Home</h1>
+<p align="center"><em>A quiet, Apple-TV-style launcher for Samsung Tizen TVs.</em></p>
+<p align="center">Sideload it in minutes, then make the <b>Home button</b> open it — no root, no store, and every step is reversible.</p>
 
-Sideload a quiet launcher on any Samsung Tizen TV, then make the **Home button**
-open it — no root, no store, and every step is reversible.
-
-![Clean Home running on a Samsung AU8000](docs/hero.jpg)
+![Clean Home on the Crimson Bonsai wallpaper](docs/launcher.png)
 
 - Clean, Apple-TV-style launcher: app-card dock, All apps, clock + weather
 - **Hidden Controls** popover: inputs, Wi-Fi, TV settings, theme, diagnostics
@@ -47,6 +47,8 @@ python3 install.py
     It opens a local wizard at `http://127.0.0.1:8765` that finds your TV on the
     network, walks through Developer Mode and the certificate profile, then builds
     and installs Clean Home. It binds to localhost only.
+
+![The guided installer](docs/installer.png)
 
     No wizard? The same install from the terminal:
 
