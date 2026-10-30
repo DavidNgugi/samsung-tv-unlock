@@ -163,6 +163,11 @@
         "Create one with <code>tizen certificate</code> if the list is empty.</p>" +
       "</div>" +
       '<div class="card" style="margin-top:12px">' +
+        '<div class="label">Family photos (optional)</div>' +
+        '<input id="family-dir" class="field" value="' + esc(state.settings.familyDir || "~/Pictures/Clean Home/Family") + '">' +
+        '<p class="hint">Put photos in this folder. They stay on this computer and are packaged only into this TV install; they are never added to Git.</p>' +
+      "</div>" +
+      '<div class="card" style="margin-top:12px">' +
         '<div class="row"><button type="button" class="primary" id="install-btn"' + (state.settings.tvIp ? "" : " disabled") + ">Install Clean Home</button>" +
         '<span class="hint" style="margin:0">' + (state.settings.tvIp ? "TV: " + esc(state.settings.tvIp) : "Connect to a TV first (previous step).") + "</span></div>" +
         '<div id="install-status"></div>' +
@@ -293,12 +298,13 @@
 
   function install() {
     var profile = ($("profile") && $("profile").value) || "peregrine-samsung";
-    saveSettings({ profile: profile, tvIp: state.settings.tvIp || "" });
+    var familyDir = (($('family-dir') && $('family-dir').value) || "").trim();
+    saveSettings({ profile: profile, tvIp: state.settings.tvIp || "", familyDir: familyDir });
     $("install-btn").disabled = true;
     $("install-log").hidden = false;
     $("install-log").textContent = "";
     $("install-status").innerHTML = '<div class="progress"><i></i></div>';
-    api("/api/install", { method: "POST", body: JSON.stringify({ ip: state.settings.tvIp, profile: profile }) }).then(function (data) {
+    api("/api/install", { method: "POST", body: JSON.stringify({ ip: state.settings.tvIp, profile: profile, familyDir: familyDir }) }).then(function (data) {
       pollJob(data.job);
     }).catch(function (error) {
       $("install-btn").disabled = false;

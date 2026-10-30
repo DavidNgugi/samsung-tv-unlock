@@ -12,11 +12,17 @@ PROFILE="${PROFILE:-peregrine-samsung}"
 APP_ID="tvunlock02.Launcher"
 OUT="$ROOT/build/launcher"
 SAFE="$ROOT/build/CleanHome.wgt"
+FAMILY_DIR="${CLEANHOME_FAMILY_DIR:-$HOME/Pictures/Clean Home/Family}"
+
+STAGE="$(mktemp -d "${TMPDIR:-/tmp}/cleanhome-launcher.XXXXXX")"
+trap 'rm -rf "$STAGE"' EXIT
+cp -R "$ROOT/apps/Launcher" "$STAGE/Launcher"
+python3 "$ROOT/tools/prepare-family-wallpapers.py" --source "$FAMILY_DIR" --launcher "$STAGE/Launcher"
 
 export PATH="$HOME/tizen-studio/tools:$HOME/tizen-studio/tools/ide/bin:$PATH"
 
 rm -rf "$OUT"
-tizen package -t wgt -s "$PROFILE" -o "$OUT" -- "$ROOT/apps/Launcher"
+tizen package -t wgt -s "$PROFILE" -o "$OUT" -- "$STAGE/Launcher"
 
 SRC="$(find "$OUT" -name '*.wgt' | head -1)"
 [ -n "$SRC" ] || { echo "no .wgt produced" >&2; exit 1; }

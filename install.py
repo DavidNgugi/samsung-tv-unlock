@@ -239,7 +239,7 @@ class Handler(BaseHTTPRequestHandler):
 
         if path == "/api/settings":
             data = read_settings()
-            data.update({k: body[k] for k in ("name", "tvIp", "profile", "home") if k in body})
+            data.update({k: body[k] for k in ("name", "tvIp", "profile", "home", "familyDir") if k in body})
             write_settings(data)
             if body.get("name"):
                 set_app_name(str(body["name"])[:60])
@@ -264,6 +264,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/install":
             ip = body.get("ip") or ""
             profile = body.get("profile") or "peregrine-samsung"
+            family_dir = body.get("familyDir") or os.path.expanduser("~/Pictures/Clean Home/Family")
             if not ip:
                 return self._json({"error": "no ip"}, 400)
             script = (
@@ -271,7 +272,7 @@ class Handler(BaseHTTPRequestHandler):
                 'sdb connect %s:26101 >/dev/null 2>&1 || true; PROFILE=%s tools/deploy-launcher.sh'
                 % (ip, profile)
             )
-            return self._json({"job": run_job(["bash", "-lc", script], label="install")})
+            return self._json({"job": run_job(["bash", "-lc", script], env={"CLEANHOME_FAMILY_DIR": family_dir}, label="install")})
 
         if path == "/api/backup":
             return self._json({"job": run_job(["bash", "tools/backup-tv.sh"], label="backup")})

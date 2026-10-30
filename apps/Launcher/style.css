@@ -294,6 +294,8 @@ html, body {
   width: 10px; height: 10px; border-radius: 50%;
   background: #4ade80; margin-right: 12px;
 }
+.pill.connected { color: #73e6a0; }
+.pill.connected .dot { background: #55d982; box-shadow: 0 0 10px rgba(85,217,130,0.7); }
 .pill .dot.off { background: #f87171; }
 
 .toast {
@@ -510,7 +512,7 @@ html, body {
 #stage > .wallpicker { z-index: 4; }
 
 /* ---- static wallpaper fallback while audio plays ---- */
-.wallpaper-still { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; object-fit: cover; z-index: 1; opacity: 0; transition: opacity 200ms linear; pointer-events: none; }
+.wallpaper-still { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; object-fit: cover; z-index: 1; opacity: 0; transition: opacity 1800ms cubic-bezier(0.42, 0, 1, 1); pointer-events: none; }
 .wallpaper-still.on { opacity: 1; }
 
 /* Prime Video reads as a white plate with the blue wordmark. */
@@ -546,8 +548,11 @@ html, body {
 .controls-head { font-size: 15px; letter-spacing: 0.22em; color: rgba(243,245,248,0.42); margin: 6px 12px 12px; }
 .ctrl-item { display: flex; align-items: center; padding: 12px 14px; border-radius: 14px; font-size: 24px; color: rgba(243,245,248,0.82); }
 .ctrl-item .sub { margin-left: auto; font-size: 18px; color: rgba(243,245,248,0.5); }
+.ctrl-item.connected { color: #73e6a0; }
+.ctrl-item.connected .sub { color: #55d982; }
 .ctrl-item.focus { background: #fff; color: #111; }
 .ctrl-item.focus .sub { color: rgba(0,0,0,0.5); }
+.ctrl-item.focus .ctrl-icon { filter: brightness(0) saturate(100%); }
 
 .util-gear { width: 26px; height: 26px; display: block; }
 

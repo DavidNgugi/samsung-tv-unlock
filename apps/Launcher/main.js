@@ -117,6 +117,7 @@
     wallIndex: 1,
     controlsOpen: false,
     controlsIndex: 0,
+    familyCarousel: false,
     reordering: false,
     reorderOriginal: null,
     holdTimer: null,
@@ -129,6 +130,8 @@
     railIndex: 0,
     network: "",
     wifiSsid: "",
+    wifiStatus: "",
+    videoSources: null,
     gridIndex: 0,
     apps: [],
     dock: [],
@@ -140,6 +143,7 @@
     wallpaper: document.getElementById("wallpaper"),
     wallpaperDim: document.getElementById("wallpaper-dim"),
     wallpaperStill: document.getElementById("wallpaper-still"),
+    wallpaperStillNext: document.getElementById("wallpaper-still-next"),
     time: document.getElementById("time"),
     date: document.getElementById("date"),
     weather: document.getElementById("weather"),
@@ -197,19 +201,89 @@
   // ---- live wallpaper (test) ----
   var WALLPAPERS = [
     { id: "off", name: "Off" },
-    { id: "batman", name: "Batman", file: "wallpapers/batman.mp4", thumb: "wallpapers/batman.jpg" },
-    { id: "batman-mono", name: "Batman Mono", file: "wallpapers/batman-mono.mp4", thumb: "wallpapers/batman-mono.jpg" },
-    { id: "pixel-rain", name: "Pixel Rain", file: "wallpapers/pixel-rain.mp4", thumb: "wallpapers/pixel-rain.jpg" }
+    { id: "batman", name: "Batman", file: "wallpapers/batman.mp4", thumb: "wallpapers/thumbs/batman.jpg" },
+    { id: "batman-mono", name: "Batman Mono", file: "wallpapers/batman-mono.mp4", thumb: "wallpapers/thumbs/batman-mono.jpg" },
+    { id: "pixel-rain", name: "Pixel Rain", file: "wallpapers/pixel-rain.mp4", thumb: "wallpapers/thumbs/pixel-rain.jpg" }
   ];
   var wallpaperIndex = 0;
-  function setWallpaper(i) {
+  var stillActive = 0;
+  var stillLoadToken = 0;
+  var familyCarouselTimer = null;
+  var FAMILY_CAROUSEL_MS = 45000;
+  function isStillWallpaper(wp) {
+    return !!(wp && (wp.still || /\.(?:jpe?g|png)$/i.test(wp.file || "")));
+  }
+  function isFamilyWallpaper(wp) {
+    return !!(wp && (wp.category === "family" || /^family-/.test(wp.id || "")));
+  }
+  function familyWallpaperIndexes() {
+    var indexes = [];
+    for (var i = 0; i < WALLPAPERS.length; i++) {
+      if (isFamilyWallpaper(WALLPAPERS[i])) indexes.push(i);
+    }
+    return indexes;
+  }
+  function stopFamilyCarousel() {
+    if (familyCarouselTimer) { clearTimeout(familyCarouselTimer); familyCarouselTimer = null; }
+    state.familyCarousel = false;
+    try { localStorage.setItem("family-carousel", "0"); } catch (e) {}
+  }
+  function scheduleFamilyCarousel() {
+    if (familyCarouselTimer) clearTimeout(familyCarouselTimer);
+    if (!state.familyCarousel) return;
+    familyCarouselTimer = setTimeout(function () {
+      familyCarouselTimer = null;
+      advanceFamilyCarousel();
+    }, FAMILY_CAROUSEL_MS);
+  }
+  function advanceFamilyCarousel() {
+    var indexes = familyWallpaperIndexes();
+    if (!state.familyCarousel || !indexes.length) return;
+    var p = indexes.indexOf(wallpaperIndex);
+    var next = indexes[(p < 0 ? 0 : p + 1) % indexes.length];
+    setWallpaper(next, { fromCarousel: true });
+    scheduleFamilyCarousel();
+  }
+  function showStill(src, transition) {
+    if (!el.wallpaperStill || !el.wallpaperStillNext) return;
+    var current = stillActive ? el.wallpaperStillNext : el.wallpaperStill;
+    var incoming = stillActive ? el.wallpaperStill : el.wallpaperStillNext;
+    var token = ++stillLoadToken;
+    incoming.onload = function () {
+      if (token !== stillLoadToken) return;
+      incoming.classList.add("on");
+      if (!transition || !current.classList.contains("on")) {
+        current.classList.remove("on");
+        stillActive = stillActive ? 0 : 1;
+        return;
+      }
+      setTimeout(function () {
+        if (token === stillLoadToken) {
+          current.classList.remove("on");
+          stillActive = stillActive ? 0 : 1;
+        }
+      }, 1900);
+    };
+    incoming.src = src;
+    if (!transition || !current.classList.contains("on")) incoming.classList.add("on");
+  }
+  function setWallpaper(i, options) {
+    options = options || {};
     wallpaperIndex = (i + WALLPAPERS.length) % WALLPAPERS.length;
     var wp = WALLPAPERS[wallpaperIndex];
+    var still = isStillWallpaper(wp);
+    if (!isFamilyWallpaper(wp) && !options.fromCarousel) stopFamilyCarousel();
     if (el.wallpaperStill) {
-      if (wp.thumb) el.wallpaperStill.src = wp.thumb; else el.wallpaperStill.removeAttribute("src");
-      el.wallpaperStill.classList.remove("on");
+      if (still) {
+        showStill(wp.file || wp.thumb, !!options.fromCarousel || isFamilyWallpaper(wp));
+      } else {
+        el.wallpaperStill.removeAttribute("src");
+        el.wallpaperStillNext.removeAttribute("src");
+        el.wallpaperStill.classList.remove("on");
+        el.wallpaperStillNext.classList.remove("on");
+      }
     }
-    if (wp.file) {
+    if (wp.file && !still) {
       el.wallpaper.src = wp.file;
       el.wallpaper.classList.add("on");
       el.wallpaperDim.classList.add("on");
@@ -217,12 +291,16 @@
       if (p && p.catch) p.catch(function () {});
     } else {
       el.wallpaper.classList.remove("on");
-      el.wallpaperDim.classList.remove("on");
+      if (!still) el.wallpaperDim.classList.remove("on");
       el.wallpaper.pause();
       el.wallpaper.removeAttribute("src");
-      el.wallpaper.load();
+      // Detaching the source is enough for a still wallpaper. A synchronous
+      // video.load() here stalls the TV's main thread during OK/selection.
+      if (!still) setTimeout(function () { try { el.wallpaper.load(); } catch (e) {} }, 0);
     }
     try { localStorage.setItem("tv-wallpaper", wp.id); } catch (e) {}
+    if (isFamilyWallpaper(wp) && state.familyCarousel && !options.fromCarousel) scheduleFamilyCarousel();
+    renderControls();
     toast("Wallpaper: " + wp.name);
   }
   function cycleWallpaper(dir) { setWallpaper(wallpaperIndex + (dir || 1)); }
@@ -272,18 +350,24 @@
         try { el.wallpaper.load(); } catch (e) {}
       }
       if (el.wallpaperStill && el.wallpaperStill.getAttribute("src")) el.wallpaperStill.classList.add("on");
+      if (el.wallpaperStillNext && el.wallpaperStillNext.getAttribute("src")) el.wallpaperStillNext.classList.add("on");
     } else {
       if (wallpaperResumeTimer) clearTimeout(wallpaperResumeTimer);
       wallpaperResumeTimer = setTimeout(function () {
         wallpaperResumeTimer = null;
         var wp = WALLPAPERS[wallpaperIndex];
-        if (wp && wp.file) {
+        if (wp && wp.file && !isStillWallpaper(wp)) {
           if (el.wallpaper.getAttribute("src") !== wp.file) el.wallpaper.src = wp.file;
           el.wallpaper.classList.add("on");
           el.wallpaperDim.classList.add("on");
           try { el.wallpaper.play(); } catch (e) {}
+        } else if (wp && isStillWallpaper(wp)) {
+          el.wallpaper.classList.remove("on");
+          el.wallpaperDim.classList.add("on");
+          if (el.wallpaperStill) el.wallpaperStill.classList.add("on");
         }
-        if (el.wallpaperStill) el.wallpaperStill.classList.remove("on");
+        if (el.wallpaperStill && (!wp || !isStillWallpaper(wp))) el.wallpaperStill.classList.remove("on");
+        if (el.wallpaperStillNext && (!wp || !isStillWallpaper(wp))) el.wallpaperStillNext.classList.remove("on");
       }, 1600);
     }
   }
@@ -321,12 +405,24 @@
     }
     return false;
   }
+  function restoreFamilyCarousel() {
+    var indexes = familyWallpaperIndexes();
+    var enabled = false;
+    try { enabled = localStorage.getItem("family-carousel") === "1"; } catch (e) {}
+    if (!enabled || !indexes.length) return;
+    state.familyCarousel = true;
+    if (!isFamilyWallpaper(WALLPAPERS[wallpaperIndex])) {
+      setWallpaper(indexes[0], { fromCarousel: true });
+    } else {
+      scheduleFamilyCarousel();
+    }
+  }
   function loadWallpaperCatalog() {
     var settled = false;
     function settle() {
       if (settled) return;
       settled = true;
-      if (applySavedWallpaper()) return;
+      if (applySavedWallpaper()) { restoreFamilyCarousel(); return; }
       if (hasTizen()) { setWallpaper(0); return; }
       // Browser preview: start on one of the bundled wallpapers, not black.
       var pick = 1;
@@ -342,7 +438,14 @@
       var extra = list.filter(function (w) { return w && w.file && !known[w.id]; })
         .map(function (w) { return { id: w.id, name: w.name || w.id, file: w.file, thumb: w.thumb, category: w.category }; });
       if (extra.length) WALLPAPERS = off.concat(WALLPAPERS.filter(function (w) { return w.file; }), extra);
+      try {
+        if (hasTizen() && !localStorage.getItem("family-wallpapers-v1")) {
+          localStorage.setItem("tv-wallpaper", "family-david-liz-2");
+          localStorage.setItem("family-wallpapers-v1", "1");
+        }
+      } catch (e) {}
       if (state.wallOpen) renderWallPicker();
+      restoreFamilyCarousel();
       settle();
     }).catch(settle);
   }
@@ -359,6 +462,18 @@
       else if (n.bottom > g.bottom) el.wallgrid.scrollTop += (n.bottom - g.bottom);
     }
   }
+  function loadVisibleWallThumbs() {
+    if (!el.wallgrid) return;
+    var box = el.wallgrid.getBoundingClientRect();
+    var imgs = el.wallgrid.querySelectorAll("img[data-src]");
+    for (var i = 0; i < imgs.length; i++) {
+      var rect = imgs[i].parentNode.getBoundingClientRect();
+      if (rect.bottom >= box.top - 240 && rect.top <= box.bottom + 240) {
+        imgs[i].src = imgs[i].getAttribute("data-src");
+        imgs[i].removeAttribute("data-src");
+      }
+    }
+  }
   function renderWallPicker() {
     el.wallgrid.innerHTML = "";
     WALLPAPERS.forEach(function (wp, i) {
@@ -367,7 +482,9 @@
       if (wp.thumb) {
         var img = document.createElement("img");
         img.alt = "";
-        img.src = wp.thumb;
+        img.setAttribute("data-src", wp.thumb);
+        img.setAttribute("loading", "lazy");
+        img.setAttribute("decoding", "async");
         t.appendChild(img);
       } else if (!wp.file) {
         t.textContent = "Off";
@@ -379,11 +496,13 @@
       el.wallgrid.appendChild(t);
     });
     wallpaperFocus();
+    setTimeout(loadVisibleWallThumbs, 0);
   }
   function openWallPicker() {
     state.wallOpen = true;
     state.wallIndex = wallpaperIndex;
     el.wallpicker.hidden = false;
+    el.wallgrid.onscroll = loadVisibleWallThumbs;
     requestAnimationFrame(function () { el.wallpicker.classList.add("open"); });
     renderWallPicker();
   }
@@ -420,14 +539,29 @@
     { key: "wifi", label: "Wi-Fi", icon: "icons/wifi-on.svg" },
     { key: "settings", label: "TV settings", icon: "icons/gear.svg" },
     { key: "theme", label: "Theme", icon: "icons/theme.svg" },
+    { key: "family-carousel", label: "Family carousel", icon: "icons/theme.svg" },
     { key: "diag", label: "Diag", icon: "icons/diag.svg" },
     { key: "home", label: "Samsung Home", icon: "icons/home.svg" }
   ];
+  function hdmiConnected(port) {
+    for (var i = 0; state.videoSources && i < state.videoSources.length; i++) {
+      var source = state.videoSources[i] || {};
+      if (String(source.type || "").toUpperCase() === "HDMI" &&
+          String(source.number || source.name || "").replace(/\D/g, "") === String(port)) return true;
+    }
+    return false;
+  }
+  function controlConnected(item) {
+    if (item.key === "wifi") return state.network === "WIFI" && state.wifiStatus !== "OFF";
+    if (item.key.indexOf("hdmi") === 0 && state.videoSources !== null) return hdmiConnected(item.key.slice(4));
+    return false;
+  }
   function renderControls() {
     el.controlsList.innerHTML = "";
     CONTROLS.forEach(function (item, i) {
       var row = document.createElement("div");
-      row.className = "ctrl-item" + (i === state.controlsIndex ? " focus" : "");
+      row.className = "ctrl-item" + (i === state.controlsIndex ? " focus" : "") +
+        (controlConnected(item) ? " connected" : "");
       if (item.icon) {
         var ic = document.createElement("img");
         ic.className = "ctrl-icon";
@@ -438,11 +572,26 @@
       var label = document.createElement("span");
       label.textContent = item.label;
       row.appendChild(label);
-      if (item.sub) {
+      var subText = item.sub || "";
+      if (item.key.indexOf("hdmi") === 0) {
+        var port = item.key.slice(4);
+        var connected = hdmiConnected(port);
+        subText = state.videoSources === null ? "Checking…" : (connected ? "✓ Connected" : "Not connected");
+      } else if (item.key === "wifi") {
+        subText = state.network === "WIFI" && state.wifiStatus !== "OFF" ? "✓ " + (state.wifiSsid || "Connected") :
+          (state.network === "ETHERNET" ? "Ethernet" : "Not connected");
+      }
+      if (subText) {
         var sub = document.createElement("span");
         sub.className = "sub";
-        sub.textContent = item.sub;
+        sub.textContent = subText;
         row.appendChild(sub);
+      }
+      if (item.key === "family-carousel") {
+        var status = document.createElement("span");
+        status.className = "sub";
+        status.textContent = state.familyCarousel ? "✓ On · 45 sec" : "Off";
+        row.appendChild(status);
       }
       el.controlsList.appendChild(row);
     });
@@ -464,13 +613,30 @@
   function controlsActivate() {
     var item = CONTROLS[state.controlsIndex];
     if (!item) return;
-    closeControls();
+    if (item.key !== "family-carousel") closeControls();
     if (item.key === "tv") { launch({ id: LIVETV_APP, name: "TV" }); return; }
     if (item.key.indexOf("hdmi") === 0) { switchSource("HDMI" + item.key.slice(4)); return; }
     if (item.key === "ambient") { launch({ id: "org.tizen.ambientapp", name: "Ambient" }); return; }
     if (item.key === "wifi") { launch({ id: NETWORK_SETTINGS, name: "Wi-Fi" }); return; }
     if (item.key === "settings") { launch({ id: SETTINGS_APP, name: "TV settings" }); return; }
     if (item.key === "theme") { cycleTheme(); return; }
+    if (item.key === "family-carousel") {
+      var indexes = familyWallpaperIndexes();
+      if (!indexes.length) { toast("No family photos installed"); return; }
+      if (state.familyCarousel) {
+        stopFamilyCarousel();
+        renderControls();
+        toast("Family carousel: off");
+      } else {
+        state.familyCarousel = true;
+        try { localStorage.setItem("family-carousel", "1"); } catch (e) {}
+        if (!isFamilyWallpaper(WALLPAPERS[wallpaperIndex])) setWallpaper(indexes[0], { fromCarousel: true });
+        scheduleFamilyCarousel();
+        renderControls();
+        toast("Family carousel: on · 45 sec");
+      }
+      return;
+    }
     if (item.key === "diag") { sdkDiag(); return; }
     if (item.key === "home") { launch({ id: SAMSUNG_HOME, name: "Samsung Home" }); return; }
   }
@@ -800,13 +966,23 @@
   }
 
   function railItems() {
+    function hdmiStatus(n) {
+      if (state.videoSources === null) return "Checking…";
+      for (var i = 0; i < state.videoSources.length; i++) {
+        var source = state.videoSources[i] || {};
+        if (String(source.type || "").toUpperCase() !== "HDMI") continue;
+        var number = String(source.number || source.name || "").replace(/\D/g, "");
+        if (number === String(n)) return "Connected";
+      }
+      return "Not connected";
+    }
     return [
       { key: "music", label: "Music", sub: "Spotify" },
-      { key: "wifi", label: "Wi-Fi", sub: state.network === "WIFI" ? (state.wifiSsid || "Connected") : (state.network === "ETHERNET" ? "Ethernet" : "No network"), up: state.network === "WIFI" || state.network === "ETHERNET" },
-      { key: "hdmi1", label: "HDMI 1", sub: "" },
-      { key: "hdmi2", label: "HDMI 2", sub: "" },
-      { key: "hdmi3", label: "HDMI 3", sub: "" },
-      { key: "hdmi4", label: "HDMI 4", sub: "" },
+      { key: "wifi", label: "Wi-Fi", sub: state.network === "WIFI" && state.wifiStatus !== "OFF" ? (state.wifiSsid || "Connected") : (state.network === "ETHERNET" ? "Ethernet" : "No network"), up: (state.network === "WIFI" && state.wifiStatus !== "OFF") || state.network === "ETHERNET" },
+      { key: "hdmi1", label: "HDMI 1", sub: hdmiStatus(1), up: hdmiStatus(1) === "Connected" },
+      { key: "hdmi2", label: "HDMI 2", sub: hdmiStatus(2), up: hdmiStatus(2) === "Connected" },
+      { key: "hdmi3", label: "HDMI 3", sub: hdmiStatus(3), up: hdmiStatus(3) === "Connected" },
+      { key: "hdmi4", label: "HDMI 4", sub: hdmiStatus(4), up: hdmiStatus(4) === "Connected" },
       { key: "livetv", label: "TV", sub: "Tuner" },
       { key: "ambient", label: "Ambient", sub: "Art" }
     ];
@@ -816,7 +992,7 @@
     el.rail.innerHTML = "";
     railItems().forEach(function (item, index) {
       var node = document.createElement("div");
-      node.className = "pill";
+      node.className = "pill" + (item.up ? " connected" : "");
       node.setAttribute("data-index", index);
 
       var chip = document.createElement("span");
@@ -852,11 +1028,26 @@
         if (state.zone === "rail") paintFocus();
       }, function () { /* read-only probe; ignore */ });
       window.tizen.systeminfo.getPropertyValue("WIFI_NETWORK", function (wifi) {
-        state.wifiSsid = (wifi && wifi.ssid) || "";
+        state.wifiStatus = (wifi && wifi.status) || "";
+        state.wifiSsid = (wifi && (wifi.ssid || wifi.networkName || wifi.name)) || "";
         renderRail();
         if (state.zone === "rail") paintFocus();
+        if (state.controlsOpen) renderControls();
       }, function () { /* no ssid */ });
+      readVideoSources();
     } catch (e) { /* older firmware */ }
+  }
+
+  function readVideoSources() {
+    if (!(window.tizen && window.tizen.systeminfo)) return;
+    try {
+      window.tizen.systeminfo.getPropertyValue("VIDEOSOURCE", function (info) {
+        state.videoSources = (info && info.connected) || [];
+        renderRail();
+        if (state.zone === "rail") paintFocus();
+        if (state.controlsOpen) renderControls();
+      }, function () { state.videoSources = null; renderRail(); });
+    } catch (e) { state.videoSources = null; }
   }
 
   function renderDock() {
@@ -2129,7 +2320,10 @@
 
     el.title.textContent = "Loading";
     el.sub.textContent = "Reading the app list (about 4 seconds)…";
-    fetchApps();
+    // Keep the launcher interactive immediately on a cold install. The TV's
+    // app enumeration is slow and can monopolize the UI thread for seconds.
+    adopt(DEMO_APPS.slice());
+    setTimeout(fetchApps, 120);
   }
 
   window.addEventListener("load", function () {
@@ -2137,7 +2331,7 @@
     fit();
     tick();
     setInterval(tick, 15000);
-    loadWeather();
+    setTimeout(loadWeather, 800);
     setInterval(loadWeather, 900000);
     if (window.tizen && window.tizen.tvinputdevice) {
       ["MediaPlayPause", "MediaPlay", "MediaPause", "MediaStop",
@@ -2149,7 +2343,6 @@
     }
     if (DIAGNOSTICS) reportCaps();
     renderRail();
-    readNetwork();
     if (DIAGNOSTICS) probeSystem();
     var bench = /[?&]bench=([a-z]+)/.exec(location.search);
     if (bench) {
@@ -2157,16 +2350,22 @@
       setTimeout(benchFocus, 4000);
     }
     loadApps();
-    loadWallpaperCatalog();
+    // Catalog and device status are local/async; let the first launcher frame
+    // paint before doing any background work.
+    setTimeout(loadWallpaperCatalog, 0);
+    setTimeout(readNetwork, 250);
+    setInterval(readNetwork, 10000);
     try { SPOTIFY_URL = localStorage.getItem("spotifyUrl") || SPOTIFY_URL; } catch (e) {}
     setTimeout(pollSpotify, 1500);
     if (SPOTIFY_CLIENT_ID && SPOTIFY_REFRESH) { spotifyRefreshToken().catch(function () {}); }
-    if (!window.Spotify) {
-      var sdkScript = document.createElement("script");
-      sdkScript.src = "https://sdk.scdn.co/spotify-player.js";
-      sdkScript.async = true;
-      document.head.appendChild(sdkScript);
-    }
+    setTimeout(function () {
+      if (!window.Spotify) {
+        var sdkScript = document.createElement("script");
+        sdkScript.src = "https://sdk.scdn.co/spotify-player.js";
+        sdkScript.async = true;
+        document.head.appendChild(sdkScript);
+      }
+    }, 1800);
     try {
       if (window.tizen && tizen.application && tizen.application.addAppInfoEventListener) {
         tizen.application.addAppInfoEventListener(function (info) {

@@ -97,6 +97,28 @@ version table). The app install in Part 1 is identical.
 - **Reorder:** hold **OK** on a dock tile → Left/Right moves it → **OK** locks,
   **Back** cancels.
 
+## Family photo wallpapers
+
+Clean Home can package personal photos as TV-ready 16:9 wallpapers without
+putting those photos in this repository. Put the photos you want to use in:
+
+~~~text
+~/Pictures/Clean Home/Family
+~~~
+
+The installer asks for this directory during setup. The terminal deploy script
+uses it automatically, or you can choose another directory:
+
+~~~bash
+CLEANHOME_FAMILY_DIR="/path/to/family-photos" tools/deploy-launcher.sh
+~~~
+
+Photos are converted into centered sharp images over a blurred version of the
+same photo, with thumbnails for the fast wallpaper picker. They are read into a
+temporary packaging directory and are never copied into the Git working tree.
+The launcher’s **Family carousel** setting can then rotate them with a slow
+cross-fade; its row shows **✓ On · 45 sec** when enabled.
+
 ---
 
 ## Part 5 — Back up
