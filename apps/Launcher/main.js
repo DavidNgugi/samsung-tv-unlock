@@ -2318,8 +2318,6 @@
       return;
     }
 
-    el.title.textContent = "Loading";
-    el.sub.textContent = "Reading the app list (about 4 seconds)…";
     // Keep the launcher interactive immediately on a cold install. The TV's
     // app enumeration is slow and can monopolize the UI thread for seconds.
     adopt(DEMO_APPS.slice());
